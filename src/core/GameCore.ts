@@ -169,14 +169,15 @@ export class GameCore {
           this.bus.emit('gameEnded', newState)
         }
 
-        try {
-          await this.config.storage.save({
-            id: GAME_ID,
-            state: newState,
-          })
-        } catch (err) {
-          this.bus.emit('error', toError(err))
-        }
+        // Fire-and-forget: storage must never gate the turn loop. A
+        // hanging save would otherwise block abort (undo/reset/stop).
+        // `makeMove` returns a fresh state object each turn, so the
+        // closure safely captures the post-move snapshot.
+        this.config.storage
+          .save({ id: GAME_ID, state: newState })
+          .catch((err) =>
+            this.bus.emit('error', toError(err)),
+          )
       }
     } finally {
       if (this.loopAbort === controller) {
