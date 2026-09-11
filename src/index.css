@@ -1,20 +1,159 @@
+/*
+ * Default theme (Chess.com style). These CSS custom properties are the
+ * fallback values; at runtime a theme plugin overrides them via
+ * `themeToCssVariables(theme)` injected onto the root element.
+ * No rule below hardcodes a color outside these variables.
+ */
 :root {
+  --page-background: #312e2b;
+  --panel-background: #262421;
+  --text-primary: #ffffff;
+  --text-muted: #9a9a9a;
+
+  --light-square: #ebecd0;
+  --dark-square: #779556;
+
+  --selected-square: #f6f669;
+  --previous-move: #cdd26a;
+  --legal-move: rgba(20, 85, 30, 0.5);
+  --check-square: rgba(255, 0, 0, 0.5);
+
+  --border-radius: 4px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
+  color: var(--text-primary);
+  background-color: var(--page-background);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  color: var(--text-primary);
+  background-color: var(--page-background);
 }
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  min-height: 100vh;
+}
+
+/* ---- Page skeleton ---- */
+
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.game-header {
+  padding: 0.75rem 1rem;
+  background-color: var(--panel-background);
+  border-bottom: 1px solid var(--text-muted);
+}
+
+.game-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.game-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  padding: 1rem;
+}
+
+.board-area {
+  min-width: 0;
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--panel-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+/* ---- GameStatus ---- */
+
+.game-status {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* ---- MoveHistory ---- */
+
+.move-history {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.move-history--empty {
+  color: var(--text-muted);
+}
+
+.move-history-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 1fr;
+  padding: 0.25rem 0;
+}
+
+.move-number {
+  color: var(--text-muted);
+}
+
+/* ---- GameControls ---- */
+
+.game-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game-controls button {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--text-muted);
+  border-radius: var(--border-radius);
+}
+
+.game-controls button:hover {
+  color: var(--page-background);
+  background-color: var(--light-square);
+  border-color: var(--light-square);
+}
+
+/* ---- Responsive layout ---- */
+
+/* Mobile (default): board on top, panel below. */
+/* Desktop: board left, panel right. */
+@media (min-width: 768px) {
+  .game-main {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .board-area {
+    flex: 1 1 auto;
+  }
+
+  .side-panel {
+    flex: 0 0 320px;
+    width: 320px;
+  }
 }
