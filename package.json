@@ -1,0 +1,7 @@
+{
+  "name": "chessforge",
+  "version": "0.1.0",
+  "description": "ChessForge - chess project scaffold",
+  "private": true,
+  "scripts": {}
+}
