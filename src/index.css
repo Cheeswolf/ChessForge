@@ -157,3 +157,134 @@ body {
     width: 320px;
   }
 }
+
+/* ---- Error banner ---- */
+
+.error-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+  text-align: center;
+  color: var(--text-primary);
+  background-color: rgba(192, 48, 48, 0.95);
+}
+
+/* ---- Modal overlays (promotion & game result) ---- */
+
+.promotion-dialog,
+.game-result-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 24rem;
+  max-width: 90%;
+  height: fit-content;
+  max-height: 90vh;
+  padding: 1.5rem;
+  overflow-y: auto;
+  text-align: center;
+  color: var(--text-primary);
+  background-color: var(--panel-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.promotion-dialog::before,
+.game-result-dialog::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* ---- Promotion dialog ---- */
+
+.promotion-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.promotion-options {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+/* ---- Game result dialog ---- */
+
+.game-result-text {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.game-result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ---- Dialog buttons (shared controls convention) ---- */
+
+.promotion-options button,
+.promotion-cancel,
+.game-result-actions button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  background-color: transparent;
+  border: 1px solid var(--text-muted);
+  border-radius: var(--border-radius);
+}
+
+.promotion-options button:hover,
+.promotion-cancel:hover,
+.game-result-actions button:hover {
+  color: var(--page-background);
+  background-color: var(--light-square);
+  border-color: var(--light-square);
+}
+
+.promotion-options button {
+  min-width: 3rem;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* ---- Board error fallback ---- */
+
+.board-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 16rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-primary);
+  background-color: var(--panel-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.board-error div:first-child {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.board-error div:last-child {
+  color: var(--text-muted);
+}
