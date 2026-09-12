@@ -94,7 +94,7 @@ export class GameCore {
   async undo(): Promise<void> {
     await this.settleLoop()
 
-    if (!this.session) return
+    if (!this.session || this.faulted) return
 
     const state = this.session.undo()
     this.bus.emit('moveUndone', state)
@@ -104,7 +104,7 @@ export class GameCore {
   async reset(): Promise<void> {
     await this.settleLoop()
 
-    if (!this.session) return
+    if (!this.session || this.faulted) return
 
     const state = this.session.reset()
     this.bus.emit('gameReset', state)
@@ -123,6 +123,7 @@ export class GameCore {
   }
 
   private enterFault(err: unknown): void {
+    if (this.faulted) return
     this.faulted = true
     this.bus.emit('error', toError(err))
     this.loopAbort?.abort()
@@ -240,7 +241,7 @@ export class GameCore {
   }
 
   private restartLoop(): void {
-    if (!this.running || !this.session) return
+    if (!this.running || !this.session || this.faulted) return
     this.loopPromise = this.runTurnLoop()
   }
 }

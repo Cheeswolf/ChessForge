@@ -145,6 +145,58 @@ class WaitingPlayer implements PlayerPlugin {
   }
 }
 
+class CountingPlayer implements PlayerPlugin {
+  readonly id: string
+  readonly name: string
+  readonly color: Color
+  calls = 0
+
+  private resolve: ((move: Move) => void) | null = null
+
+  constructor(color: Color) {
+    this.id = `counting-${color}`
+    this.name = `Counting ${color}`
+    this.color = color
+  }
+
+  requestMove(
+    _context: PlayerContext,
+    signal: AbortSignal,
+  ): Promise<Move> {
+    this.calls++
+    return new Promise<Move>((resolve, reject) => {
+      const onAbort = (): void => {
+        this.resolve = null
+        reject(
+          new DOMException(
+            'The operation was aborted',
+            'AbortError',
+          ),
+        )
+      }
+
+      if (signal.aborted) {
+        onAbort()
+        return
+      }
+
+      signal.addEventListener('abort', onAbort, {
+        once: true,
+      })
+
+      this.resolve = (move: Move): void => {
+        signal.removeEventListener('abort', onAbort)
+        this.resolve = null
+        resolve(move)
+      }
+    })
+  }
+
+  pushExternalMove(move: Move): void {
+    this.resolve?.(move)
+  }
+}
+
 interface StubRuleBehavior {
   getState?: () => GameState
   makeMove?: (move: Move) => GameState
@@ -361,6 +413,83 @@ test('a rule getState that throws faults the core', async () => {
   expect(core.isFaulted()).toBe(true)
   expect(errors).toHaveLength(1)
   expect(errors[0].message).toBe('rule state broken')
+})
+
+test('reset and undo do not restart the loop on a faulted core', async () => {
+  const white = new CountingPlayer('white')
+  const core = makeCore({
+    rule: stubRule({
+      makeMove: () => {
+        throw new Error('rule broken')
+      },
+    }),
+    white,
+    black: new WaitingPlayer('black'),
+  })
+  const errors: Error[] = []
+  core.on('error', (error) => errors.push(error))
+
+  core.start()
+  core.submitMove({ from: 'e2', to: 'e4' })
+  await flushAsync()
+
+  expect(core.isFaulted()).toBe(true)
+  expect(errors).toHaveLength(1)
+  expect(white.calls).toBe(1)
+
+  await core.reset()
+  await flushAsync()
+
+  expect(white.calls).toBe(1)
+  expect(errors).toHaveLength(1)
+  expect(core.isFaulted()).toBe(true)
+  expect(() =>
+    core.submitMove({ from: 'g1', to: 'f3' }),
+  ).toThrow(/faulted/)
+
+  await core.undo()
+  await flushAsync()
+
+  expect(white.calls).toBe(1)
+  expect(errors).toHaveLength(1)
+  expect(core.isFaulted()).toBe(true)
+})
+
+test('reset does not re-fault a broken getState session', async () => {
+  let reads = 0
+  const brokenRule: RulePlugin = {
+    id: 'broken-state-rule',
+    name: 'Broken State Rule',
+    createSession: (): RuleSession => ({
+      getState: () => {
+        reads++
+        if (reads > 1) throw new Error('rule state broken')
+        return initialState()
+      },
+      getLegalMoves: () => [],
+      makeMove: () => initialState(),
+      undo: () => initialState(),
+      reset: () => initialState(),
+    }),
+  }
+  const core = makeCore({ rule: brokenRule })
+  const errors: Error[] = []
+  core.on('error', (error) => errors.push(error))
+
+  core.start()
+  await flushAsync()
+
+  expect(core.isFaulted()).toBe(true)
+  expect(errors).toHaveLength(1)
+
+  await core.reset()
+  await flushAsync()
+
+  expect(errors).toHaveLength(1)
+  expect(core.isFaulted()).toBe(true)
+  expect(() =>
+    core.submitMove({ from: 'e2', to: 'e4' }),
+  ).toThrow(/faulted/)
 })
 
 test('an IllegalMoveError from makeMove is a normal rejection, not a fault', async () => {
