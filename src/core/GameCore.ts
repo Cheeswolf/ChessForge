@@ -1,5 +1,6 @@
 import { EventBus } from './EventBus'
 import type { GameEvents } from './EventBus'
+import { IllegalMoveError } from './errors'
 import type {
   GameState,
   Move,
@@ -40,6 +41,7 @@ export class GameCore {
   private readonly config: GameConfig
 
   private running = false
+  private faulted = false
   private session: RuleSession | null = null
   private loopAbort: AbortController | null = null
   private loopPromise: Promise<void> | null = null
@@ -72,6 +74,12 @@ export class GameCore {
   }
 
   submitMove(move: Move): void {
+    if (this.faulted) {
+      throw new Error(
+        'Game is faulted and no longer accepts moves',
+      )
+    }
+
     const player = this.getCurrentPlayer()
 
     if (!player.pushExternalMove) {
@@ -110,6 +118,16 @@ export class GameCore {
     return this.bus.on(event, handler)
   }
 
+  isFaulted(): boolean {
+    return this.faulted
+  }
+
+  private enterFault(err: unknown): void {
+    this.faulted = true
+    this.bus.emit('error', toError(err))
+    this.loopAbort?.abort()
+  }
+
   private requireSession(): RuleSession {
     if (!this.session) {
       throw new Error('Game has not been started')
@@ -131,7 +149,13 @@ export class GameCore {
 
     try {
       while (this.running && !controller.signal.aborted) {
-        const state = session.getState()
+        let state: GameState
+        try {
+          state = session.getState()
+        } catch (err) {
+          this.enterFault(err)
+          return
+        }
 
         if (state.status.phase !== 'playing') return
 
@@ -145,17 +169,26 @@ export class GameCore {
           )
         } catch (err) {
           if (controller.signal.aborted) return
+          // A failed player pauses the turn: emit the error and stop
+          // looping rather than busy-retrying. undo/reset can resume.
           this.bus.emit('error', toError(err))
-          continue
+          return
         }
 
         let newState: GameState
         try {
           newState = session.makeMove(move)
-        } catch {
+        } catch (err) {
           if (controller.signal.aborted) return
-          this.bus.emit('moveRejected', move)
-          continue
+          if (err instanceof IllegalMoveError) {
+            this.bus.emit('moveRejected', move)
+            continue
+          }
+          // Anything that is not a normal illegal move means the rule
+          // engine itself is broken; the position can no longer be
+          // trusted, so stop the game.
+          this.enterFault(err)
+          return
         }
 
         this.bus.emit('moveMade', newState)
@@ -172,12 +205,18 @@ export class GameCore {
         // Fire-and-forget: storage must never gate the turn loop. A
         // hanging save would otherwise block abort (undo/reset/stop).
         // `makeMove` returns a fresh state object each turn, so the
-        // closure safely captures the post-move snapshot.
-        this.config.storage
-          .save({ id: GAME_ID, state: newState })
-          .catch((err) =>
-            this.bus.emit('error', toError(err)),
-          )
+        // closure safely captures the post-move snapshot. Isolate both
+        // a synchronous throw and an async rejection so the move is
+        // never rolled back and the loop keeps running.
+        try {
+          this.config.storage
+            .save({ id: GAME_ID, state: newState })
+            .catch((err) =>
+              this.bus.emit('error', toError(err)),
+            )
+        } catch (err) {
+          this.bus.emit('error', toError(err))
+        }
       }
     } finally {
       if (this.loopAbort === controller) {

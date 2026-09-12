@@ -3,7 +3,10 @@ import '@testing-library/jest-dom/vitest'
 import App from './App'
 import { defaultGameConfig } from './config/defaultGameConfig'
 import { chessComTheme } from './plugins/themes/ChessComTheme'
-import type { ThemePlugin } from './plugins/themes/ThemePlugin'
+import type {
+  ThemePlugin,
+  ThemeTokens,
+} from './plugins/themes/ThemePlugin'
 
 afterEach(() => {
   document.documentElement.removeAttribute('style')
@@ -50,4 +53,19 @@ test('injects a custom theme as CSS variables', () => {
   expect(
     document.documentElement.style.getPropertyValue('--light-square'),
   ).toBe('rgb(1, 2, 3)')
+})
+
+test('falls back to the default theme when the configured theme is broken', () => {
+  const brokenTheme: ThemePlugin = {
+    id: 'broken-theme',
+    name: 'Broken Theme',
+    tokens: undefined as unknown as ThemeTokens,
+  }
+
+  render(<App config={{ ...defaultGameConfig, theme: brokenTheme }} />)
+
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
+  expect(
+    document.documentElement.style.getPropertyValue('--light-square'),
+  ).toBe('#ebecd0')
 })

@@ -10,6 +10,7 @@ import type {
   Square,
 } from '../../core/types'
 import type { RulePlugin, RuleSession } from './RulePlugin'
+import { IllegalMoveError } from '../../core/errors'
 
 type ChessColor = 'w' | 'b'
 type ChessPieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
@@ -183,9 +184,7 @@ class ChessJsRuleSession implements RuleSession {
           : undefined,
       })
     } catch {
-      throw new Error(
-        `Illegal move: ${move.from} to ${move.to}`,
-      )
+      throw new IllegalMoveError(move)
     }
 
     return this.getState()

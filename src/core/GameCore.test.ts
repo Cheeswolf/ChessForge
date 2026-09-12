@@ -1,4 +1,5 @@
 import { GameCore } from './GameCore'
+import { IllegalMoveError } from './errors'
 import type {
   Color,
   GameState,
@@ -260,7 +261,7 @@ test('rejects an illegal move, keeps state and turn', async () => {
   const { core } = makeCore({
     rule: {
       applyMove: (move) =>
-        new Error(`illegal ${move.from}-${move.to}`),
+        new IllegalMoveError(move),
     },
   })
 
