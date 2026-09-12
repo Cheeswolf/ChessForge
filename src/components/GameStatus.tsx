@@ -4,18 +4,32 @@ export interface GameStatusProps {
   status: GameStatusModel
 }
 
-function turnLabel(turn: GameStatusModel['turn']): string {
-  return turn === 'white' ? 'White to move' : 'Black to move'
+/**
+ * Maps a GameStatus to its exact display string.
+ */
+export function gameStatusLabel(status: GameStatusModel): string {
+  if (status.phase === 'checkmate') {
+    return status.winner === 'white' ? '白方获胜：将死' : '黑方获胜：将死'
+  }
+
+  if (status.phase === 'draw') {
+    return '和棋'
+  }
+
+  if (status.inCheck) {
+    return status.turn === 'white' ? '白方被将军' : '黑方被将军'
+  }
+
+  return status.turn === 'white' ? '轮到白方' : '轮到黑方'
 }
 
 /**
- * Presentational: renders the current turn from props. Full
- * check/checkmate/draw mapping arrives in a later task.
+ * Presentational: renders the current turn / check / result string.
  */
 export default function GameStatus({ status }: GameStatusProps) {
   return (
     <div className="game-status">
-      {turnLabel(status.turn)}
+      {gameStatusLabel(status)}
     </div>
   )
 }

@@ -10,22 +10,71 @@ const history: MoveRecord[] = [
   { from: 'e2', to: 'e4', san: 'e4', color: 'white' },
   { from: 'e7', to: 'e5', san: 'e5', color: 'black' },
   { from: 'g1', to: 'f3', san: 'Nf3', color: 'white' },
+  { from: 'b8', to: 'c6', san: 'Nc6', color: 'black' },
 ]
 
 function makeStatus(
   turn: GameStatusModel['turn'],
+  inCheck = false,
 ): GameStatusModel {
-  return { phase: 'playing', turn, inCheck: false }
+  return { phase: 'playing', turn, inCheck }
 }
 
-test('displays the current turn', () => {
+test('displays the white turn', () => {
   render(<GameStatus status={makeStatus('white')} />)
-  expect(screen.getByText('White to move')).toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
 })
 
 test('displays the black turn', () => {
   render(<GameStatus status={makeStatus('black')} />)
-  expect(screen.getByText('Black to move')).toBeInTheDocument()
+  expect(screen.getByText('轮到黑方')).toBeInTheDocument()
+})
+
+test('shows white in check', () => {
+  render(<GameStatus status={makeStatus('white', true)} />)
+  expect(screen.getByText('白方被将军')).toBeInTheDocument()
+})
+
+test('shows black in check', () => {
+  render(<GameStatus status={makeStatus('black', true)} />)
+  expect(screen.getByText('黑方被将军')).toBeInTheDocument()
+})
+
+test('shows a white checkmate win', () => {
+  render(
+    <GameStatus
+      status={{
+        phase: 'checkmate',
+        turn: 'black',
+        inCheck: true,
+        winner: 'white',
+      }}
+    />,
+  )
+  expect(screen.getByText('白方获胜：将死')).toBeInTheDocument()
+})
+
+test('shows a black checkmate win', () => {
+  render(
+    <GameStatus
+      status={{
+        phase: 'checkmate',
+        turn: 'white',
+        inCheck: true,
+        winner: 'black',
+      }}
+    />,
+  )
+  expect(screen.getByText('黑方获胜：将死')).toBeInTheDocument()
+})
+
+test('shows a draw', () => {
+  render(
+    <GameStatus
+      status={{ phase: 'draw', turn: 'white', inCheck: false }}
+    />,
+  )
+  expect(screen.getByText('和棋')).toBeInTheDocument()
 })
 
 test('displays move history in "1. e4 e5" style', () => {
@@ -36,6 +85,7 @@ test('displays move history in "1. e4 e5" style', () => {
   expect(screen.getByText('e4')).toBeInTheDocument()
   expect(screen.getByText('e5')).toBeInTheDocument()
   expect(screen.getByText('Nf3')).toBeInTheDocument()
+  expect(screen.getByText('Nc6')).toBeInTheDocument()
 })
 
 test('shows an empty state when there are no moves', () => {
@@ -84,7 +134,7 @@ test('composes header, board and side panel', () => {
 
   expect(screen.getByText('Test Header')).toBeInTheDocument()
   expect(screen.getByText('Board')).toBeInTheDocument()
-  expect(screen.getByText('White to move')).toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
   expect(screen.getByText('e4')).toBeInTheDocument()
   expect(
     screen.getByRole('button', { name: '悔棋' }),
