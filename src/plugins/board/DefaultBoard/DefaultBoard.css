@@ -1,0 +1,82 @@
+/*
+ * Default board styling. Every color is taken from a theme CSS custom
+ * property (--light-square, --dark-square, --selected-square,
+ * --previous-move, --legal-move, --check-square, --border-radius,
+ * --shadow). No rule below hardcodes a color.
+ */
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  user-select: none;
+  touch-action: none;
+}
+
+.square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.square--light {
+  background-color: var(--light-square);
+}
+
+.square--dark {
+  background-color: var(--dark-square);
+}
+
+.square--selected {
+  background-color: var(--selected-square);
+}
+
+.square--previous {
+  background-color: var(--previous-move);
+}
+
+.board-piece {
+  font-size: min(10vw, 3.25rem);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.square--drag-source .board-piece {
+  opacity: 0.3;
+}
+
+.legal-marker {
+  position: absolute;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background-color: var(--legal-move);
+  pointer-events: none;
+}
+
+.check-marker {
+  position: absolute;
+  inset: 0;
+  background-color: var(--check-square);
+  pointer-events: none;
+}
+
+.dragging-piece {
+  position: fixed;
+  z-index: 100;
+  transform: translate(-50%, -50%);
+  font-size: min(10vw, 3.25rem);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
