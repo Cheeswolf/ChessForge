@@ -1,5 +1,11 @@
 # ChessForge
 
+![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-5-6E9F18?logo=vitest&logoColor=white)
+![chess.js](https://img.shields.io/badge/chess.js-1.4-222222)
+
 > 应用内标题：**Plugin Chess**
 
 一个基于插件化架构构建的本地双人国际象棋 Web 应用。MVP 第一版支持完整的标准国际象棋规则（王车易位、吃过路兵、兵升变、将军、将死、和棋），并将规则、玩家、棋盘、主题、存储五部分拆分为可替换插件。

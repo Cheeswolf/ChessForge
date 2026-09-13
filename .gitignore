@@ -21,3 +21,6 @@ dist-ssr/
 
 # Coverage
 coverage/
+
+# Superpowers (SDD workspace, transient)
+.superpowers/
