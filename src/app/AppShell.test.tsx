@@ -15,12 +15,23 @@ test('starts on the home page and does not auto-start a match', () => {
   expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
 })
 
-test('clicking "开始游戏" navigates to the match setup stub', () => {
+test('clicking "开始游戏" navigates to the match setup page', () => {
   render(<AppShell />)
 
   fireEvent.click(screen.getByRole('button', { name: '开始游戏' }))
 
   expect(screen.getByRole('heading', { name: 'MATCH SETUP' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: '配置本局插件' })).toBeInTheDocument()
+})
+
+test('match setup flow: start setup and launch a match', () => {
+  render(<AppShell />)
+
+  fireEvent.click(screen.getByRole('button', { name: '开始游戏' }))
+  expect(screen.getByRole('heading', { name: '配置本局插件' })).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: 'START MATCH' }))
+  expect(screen.getByTestId('game-page-placeholder')).toBeInTheDocument()
 })
 
 test('clicking "快速开始" jumps straight to the game placeholder', () => {

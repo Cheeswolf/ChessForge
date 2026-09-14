@@ -3,6 +3,8 @@ import { defaultMatchConfig } from '../config/defaultGameConfig'
 import { themeToCssVariables } from '../plugins/themes/themeCss'
 import { pixelForgeTheme } from '../plugins/themes/PixelForgeTheme'
 import HomePage from '../pages/HomePage/HomePage'
+import MatchSetupPage from '../pages/MatchSetupPage/MatchSetupPage'
+import { createDefaultPluginRegistry } from '../config/defaultPluginRegistry'
 import type { MatchConfig } from './MatchConfig'
 import type { AppScreen } from './AppScreen'
 
@@ -13,6 +15,7 @@ export default function AppShell() {
   }))
   const [activeMatchConfig, setActiveMatchConfig] =
     useState<Readonly<MatchConfig> | null>(null)
+  const [registry] = useState(() => createDefaultPluginRegistry())
 
   useEffect(() => {
     const variables = themeToCssVariables(pixelForgeTheme)
@@ -52,12 +55,13 @@ export default function AppShell() {
 
     case 'setup':
       return (
-        <div className="match-setup-stub">
-          <h1>MATCH SETUP</h1>
-          <p className="match-setup-stub-hint">
-            {draftConfig.ruleId}
-          </p>
-        </div>
+        <MatchSetupPage
+          config={draftConfig}
+          registry={registry}
+          onChange={setDraftConfig}
+          onStart={startMatch}
+          onBack={() => setScreen('home')}
+        />
       )
 
     case 'game':
