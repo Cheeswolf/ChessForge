@@ -1,6 +1,18 @@
 import { useMemo } from 'react'
 import PixelButton from '../../components/PixelButton'
 import PixelPanel from '../../components/PixelPanel'
+import PixelSprite from '../../components/pixel/PixelSprite'
+import {
+  ICON_BACK_ART,
+  ICON_BOARD_ART,
+  ICON_GEAR_ART,
+  ICON_PLAYER_ART,
+  ICON_RULE_ART,
+  ICON_STORAGE_ART,
+  ICON_SWORDS_ART,
+  ICON_THEME_ART,
+  ICON_THEME_PALETTE,
+} from '../../components/pixel/sprites'
 import { defaultMatchConfig } from '../../config/defaultGameConfig'
 import type { MatchConfig } from '../../app/MatchConfig'
 import type { PluginRegistry } from '../../core/PluginRegistry'
@@ -42,136 +54,48 @@ export interface MatchSetupPageProps {
   onBack(): void
 }
 
-function RuleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M8 7h8M8 11h8M8 15h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function WhitePlayerIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-      <path d="M12 10c-4 0-7 2-7 5v2h14v-2c0-3-3-5-7-5z" />
-    </svg>
-  )
-}
-
-function BlackPlayerIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-      <path d="M12 10c-4 0-7 2-7 5v2h14v-2c0-3-3-5-7-5z" />
-    </svg>
-  )
-}
-
-function BoardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="2" />
-      <path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  )
-}
-
-function ThemeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-      <path d="M12 3a9 9 0 0 1 0 18 9 9 0 0 1 0-18z" fill="currentColor" opacity="0.4" />
-      <circle cx="12" cy="12" r="3" fill="currentColor" />
-    </svg>
-  )
-}
-
-function StorageIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M12 2L2 7l10 5 10-5-10-5z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M2 17l10 5 10-5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function BackArrowIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function CrossedSwordsIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M14.5 17.5L20 22M3 22l5.5-4.5M20 2l-2 6-4-2 2-6M4 2l2 6 4-2-2-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function GearIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
 const SELECTORS: Array<{
   key: keyof MatchConfig
   label: string
   sublabel: string
   icon: React.ReactNode
 }> = [
-  { key: 'ruleId', label: 'Rule Plugin', sublabel: '规则插件', icon: <RuleIcon /> },
-  { key: 'whitePlayerId', label: 'White Player', sublabel: '白方玩家', icon: <WhitePlayerIcon /> },
-  { key: 'blackPlayerId', label: 'Black Player', sublabel: '黑方玩家', icon: <BlackPlayerIcon /> },
-  { key: 'boardId', label: 'Board Plugin', sublabel: '棋盘插件', icon: <BoardIcon /> },
-  { key: 'themeId', label: 'Theme Plugin', sublabel: '主题插件', icon: <ThemeIcon /> },
-  { key: 'storageId', label: 'Storage Plugin', sublabel: '存储插件', icon: <StorageIcon /> },
+  {
+    key: 'ruleId',
+    label: 'Rule Plugin',
+    sublabel: '规则插件',
+    icon: <PixelSprite art={ICON_RULE_ART} palette={{ m: '#d9ad45' }} />,
+  },
+  {
+    key: 'whitePlayerId',
+    label: 'White Player',
+    sublabel: '白方玩家',
+    icon: <PixelSprite art={ICON_PLAYER_ART} palette={{ m: '#f2e7c9' }} />,
+  },
+  {
+    key: 'blackPlayerId',
+    label: 'Black Player',
+    sublabel: '黑方玩家',
+    icon: <PixelSprite art={ICON_PLAYER_ART} palette={{ m: '#7c8ea6' }} />,
+  },
+  {
+    key: 'boardId',
+    label: 'Board Plugin',
+    sublabel: '棋盘插件',
+    icon: <PixelSprite art={ICON_BOARD_ART} palette={{ m: '#d9ad45' }} />,
+  },
+  {
+    key: 'themeId',
+    label: 'Theme Plugin',
+    sublabel: '主题插件',
+    icon: <PixelSprite art={ICON_THEME_ART} palette={ICON_THEME_PALETTE} />,
+  },
+  {
+    key: 'storageId',
+    label: 'Storage Plugin',
+    sublabel: '存储插件',
+    icon: <PixelSprite art={ICON_STORAGE_ART} palette={{ m: '#d9ad45' }} />,
+  },
 ]
 
 export default function MatchSetupPage({
@@ -228,7 +152,10 @@ export default function MatchSetupPage({
               onClick={onBack}
               aria-label="返回"
             >
-              <BackArrowIcon />
+              <PixelSprite
+                art={ICON_BACK_ART}
+                palette={{ m: 'currentColor' }}
+              />
               <span>返回</span>
             </button>
 
@@ -286,7 +213,11 @@ export default function MatchSetupPage({
               onClick={() => onStart(config)}
               aria-label="START MATCH"
             >
-              <CrossedSwordsIcon aria-hidden="true" />
+              <PixelSprite
+                art={ICON_SWORDS_ART}
+                palette={{ m: 'currentColor' }}
+                className="match-setup-start-btn__icon"
+              />
               <span className="match-setup-start-btn__text" aria-hidden="true">
                 <span className="match-setup-start-btn__zh">开始游戏</span>
                 <span className="match-setup-start-btn__en">START MATCH</span>
@@ -298,7 +229,10 @@ export default function MatchSetupPage({
               className="match-setup-reset-btn"
               onClick={handleReset}
             >
-              <GearIcon />
+              <PixelSprite
+                art={ICON_GEAR_ART}
+                palette={{ m: 'currentColor' }}
+              />
               使用默认配置
             </PixelButton>
           </div>

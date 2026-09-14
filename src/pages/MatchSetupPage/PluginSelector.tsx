@@ -35,18 +35,20 @@ export default function PluginSelector({
           <span className="plugin-selector__label">{label}</span>
         </div>
       </div>
-      <select
-        className="plugin-selector__select"
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {options.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.name}
-          </option>
-        ))}
-      </select>
+      <div className="plugin-selector__select-wrap">
+        <select
+          className="plugin-selector__select"
+          aria-label={label}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {options.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   )
 }

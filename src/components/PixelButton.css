@@ -4,17 +4,17 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.5;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   border: 3px solid;
   border-radius: 0;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.42);
-  transition: transform 0.05s ease, box-shadow 0.05s ease;
+  transition: transform 80ms steps(2, end), box-shadow 80ms steps(2, end);
 }
 
 .pixel-button:disabled {

@@ -1,10 +1,28 @@
 /*
+ * Pixel display font (brand / titles / buttons / English labels).
+ * Vendored locally in public/fonts — no runtime CDN. OFL 1.1, see
+ * public/fonts/README.md. Latin-only by design: CJK glyphs fall through
+ * to the body font, which is exactly the dual-font strategy.
+ */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/press-start-2p-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
  * Default theme (Chess.com style). These CSS custom properties are the
  * fallback values; at runtime a theme plugin overrides them via
  * `themeToCssVariables(theme)` injected onto the root element.
  * No rule below hardcodes a color outside these variables.
  */
 :root {
+  --font-pixel: 'Press Start 2P', 'Courier New', monospace;
+  --font-body: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', system-ui,
+    sans-serif;
+
   --page-background: #312e2b;
   --panel-background: #262421;
   --text-primary: #ffffff;
@@ -21,7 +39,7 @@
   --border-radius: 4px;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   line-height: 1.5;
   font-weight: 400;
   color: var(--text-primary);
