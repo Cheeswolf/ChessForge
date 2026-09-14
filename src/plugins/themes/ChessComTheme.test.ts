@@ -1,7 +1,5 @@
-import {
-  chessComTheme,
-  themeToCssVariables,
-} from './ChessComTheme'
+import { chessComTheme } from './ChessComTheme'
+import { themeToCssVariables } from './themeCss'
 
 const REQUIRED_TOKENS = [
   'pageBackground',

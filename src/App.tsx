@@ -6,10 +6,8 @@ import {
   type AppGameConfig,
 } from './config/defaultGameConfig'
 import { useGameCore } from './hooks/useGameCore'
-import {
-  chessComTheme,
-  themeToCssVariables,
-} from './plugins/themes/ChessComTheme'
+import { chessComTheme } from './plugins/themes/ChessComTheme'
+import { themeToCssVariables } from './plugins/themes/themeCss'
 import type { ThemePlugin } from './plugins/themes/ThemePlugin'
 import GameLayout from './components/GameLayout'
 import GameErrorBoundary from './components/GameErrorBoundary'
