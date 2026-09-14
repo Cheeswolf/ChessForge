@@ -8,6 +8,32 @@ import { validateMatchConfig } from '../../app/MatchConfig'
 import PluginSelector from './PluginSelector'
 import './MatchSetupPage.css'
 
+function getPluginName(
+  registry: PluginRegistry,
+  key: keyof MatchConfig,
+  id: string,
+): string {
+  try {
+    switch (key) {
+      case 'ruleId':
+        return registry.getRule(id).name
+      case 'whitePlayerId':
+      case 'blackPlayerId':
+        return registry.getPlayer(id).name
+      case 'boardId':
+        return registry.getBoard(id).name
+      case 'themeId':
+        return registry.getTheme(id).name
+      case 'storageId':
+        return registry.getStorage(id).name
+      default:
+        return 'Unknown'
+    }
+  } catch {
+    return 'Unavailable'
+  }
+}
+
 export interface MatchSetupPageProps {
   config: MatchConfig
   registry: PluginRegistry
@@ -173,6 +199,16 @@ export default function MatchSetupPage({
     storageId: storagePlugins,
   }
 
+  const loadout = useMemo(
+    () =>
+      SELECTORS.map(({ key, sublabel }) => ({
+        key,
+        label: sublabel,
+        name: getPluginName(registry, key, config[key]),
+      })),
+    [config, registry],
+  )
+
   function handleChange(key: keyof MatchConfig, id: string) {
     onChange({ ...config, [key]: id })
   }
@@ -219,6 +255,18 @@ export default function MatchSetupPage({
               />
             ))}
           </section>
+
+          <PixelPanel className="match-setup-loadout" role="region" aria-label="Current loadout">
+            <h3 className="match-setup-loadout__title">CURRENT LOADOUT</h3>
+            <ul className="match-setup-loadout__list">
+              {loadout.map(({ key, label, name }) => (
+                <li key={key} className="match-setup-loadout__item">
+                  <span className="match-setup-loadout__label">{label}</span>
+                  <span className="match-setup-loadout__value">{name}</span>
+                </li>
+              ))}
+            </ul>
+          </PixelPanel>
 
           {errors.length > 0 && (
             <div className="match-setup-errors" role="alert">
