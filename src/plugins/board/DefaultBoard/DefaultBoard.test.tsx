@@ -41,7 +41,7 @@ describe('DefaultBoard', () => {
     }
   })
 
-  test('renders piece glyphs from the position', () => {
+  test('renders pixel pieces from the position', () => {
     renderBoard({
       position: {
         e1: { color: 'white', type: 'king' },
@@ -50,9 +50,15 @@ describe('DefaultBoard', () => {
       },
     })
 
-    expect(screen.getByTestId('square-e1')).toHaveTextContent('♔')
-    expect(screen.getByTestId('square-e2')).toHaveTextContent('♙')
-    expect(screen.getByTestId('square-e7')).toHaveTextContent('♟')
+    expect(
+      screen.getByTestId('square-e1').querySelector('[data-piece="white-king"]'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e2').querySelector('[data-piece="white-pawn"]'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e7').querySelector('[data-piece="black-pawn"]'),
+    ).not.toBeNull()
   })
 
   test('calls onSquareSelect when clicking a square', async () => {
@@ -152,8 +158,12 @@ describe('DefaultBoard', () => {
     expect(onMove).toHaveBeenCalledWith({ from: 'e2', to: 'e5' })
     // The canonical position prop is unchanged, so the pawn is still
     // rendered on e2 and not on e5.
-    expect(screen.getByTestId('square-e2')).toHaveTextContent('♙')
-    expect(screen.getByTestId('square-e5')).not.toHaveTextContent('♙')
+    expect(
+      screen.getByTestId('square-e2').querySelector('[data-piece="white-pawn"]'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e5').querySelector('[data-piece]'),
+    ).toBeNull()
   })
 
   test('highlights the from and to squares of the last move', () => {

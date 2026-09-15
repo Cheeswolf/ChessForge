@@ -4,37 +4,14 @@ import type {
   BoardPosition,
   Color,
   Piece,
-  PieceType,
   Square,
 } from '../../../core/types'
 import type { BoardPluginProps } from '../BoardPlugin'
+import PixelPiece from './PixelPiece'
 import './DefaultBoard.css'
 
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const
 const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'] as const
-
-const GLYPHS: Record<Color, Record<PieceType, string>> = {
-  white: {
-    king: '♔',
-    queen: '♕',
-    rook: '♖',
-    bishop: '♗',
-    knight: '♘',
-    pawn: '♙',
-  },
-  black: {
-    king: '♚',
-    queen: '♛',
-    rook: '♜',
-    bishop: '♝',
-    knight: '♞',
-    pawn: '♟',
-  },
-}
-
-function pieceGlyph(piece: Piece): string {
-  return GLYPHS[piece.color][piece.type]
-}
 
 const ALL_SQUARES: Square[] = (() => {
   const result: Square[] = []
@@ -66,7 +43,7 @@ function findKing(
 
 interface DragState {
   from: Square
-  glyph: string
+  piece: Piece
   x: number
   y: number
 }
@@ -124,7 +101,7 @@ export default function DefaultBoard(props: BoardPluginProps) {
     if (!piece) return
     setDrag({
       from: square,
-      glyph: pieceGlyph(piece),
+      piece,
       x: e.clientX,
       y: e.clientY,
     })
@@ -191,9 +168,7 @@ export default function DefaultBoard(props: BoardPluginProps) {
             {isChecked && (
               <span className="check-marker" aria-hidden="true" />
             )}
-            {piece && (
-              <span className="board-piece">{pieceGlyph(piece)}</span>
-            )}
+            {piece && <PixelPiece piece={piece} className="board-piece" />}
           </div>
         )
       })}
@@ -204,7 +179,7 @@ export default function DefaultBoard(props: BoardPluginProps) {
           style={{ left: drag.x, top: drag.y }}
           aria-hidden="true"
         >
-          {drag.glyph}
+          <PixelPiece piece={drag.piece} className="dragging-piece__sprite" />
         </span>
       )}
     </div>

@@ -45,8 +45,9 @@
 }
 
 .board-piece {
-  font-size: min(10vw, 3.25rem);
-  line-height: 1;
+  width: 88%;
+  height: 88%;
+  image-rendering: pixelated;
   pointer-events: none;
   user-select: none;
 }
@@ -75,8 +76,13 @@
   position: fixed;
   z-index: 100;
   transform: translate(-50%, -50%);
-  font-size: min(10vw, 3.25rem);
-  line-height: 1;
   pointer-events: none;
   user-select: none;
+}
+
+.dragging-piece__sprite {
+  display: block;
+  width: min(12vw, 3.9rem);
+  height: min(12vw, 3.9rem);
+  image-rendering: pixelated;
 }

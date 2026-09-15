@@ -6,6 +6,10 @@ export interface PixelSpriteProps {
   /** When set, transparent cells adjacent to filled cells are painted with this color first, producing a crisp 1px outline. */
   outline?: string
   className?: string
+  /** Accessible name. When set, the svg is exposed as `role="img"` instead of being hidden from assistive tech. */
+  title?: string
+  /** Extra attributes forwarded to the svg element (e.g. `data-piece`). */
+  svgProps?: Record<string, string>
 }
 
 interface RectSpec {
@@ -59,6 +63,8 @@ export default function PixelSprite({
   palette,
   outline,
   className,
+  title,
+  svgProps,
 }: PixelSpriteProps) {
   const height = art.length
   const width = art.reduce((max, row) => Math.max(max, row.length), 0)
@@ -106,8 +112,11 @@ export default function PixelSprite({
       viewBox={`0 0 ${width} ${height}`}
       shapeRendering="crispEdges"
       className={className}
-      aria-hidden="true"
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
       focusable="false"
+      {...svgProps}
     >
       {[...outlineRects, ...fillRects].map((rect, index) => (
         <rect
