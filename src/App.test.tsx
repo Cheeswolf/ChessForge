@@ -80,7 +80,7 @@ test('main opening: 1. e4 e5 2. Nf3 Nc6 3. Bb5', async () => {
   expect(screen.getByText('Bb5')).toBeInTheDocument()
   expect(screen.getByText('Nf3')).toBeInTheDocument()
   expect(screen.getByText('Nc6')).toBeInTheDocument()
-  expect(screen.getByText('3.')).toBeInTheDocument()
+  expect(screen.getByText('03')).toBeInTheDocument()
 })
 
 test("fool's mate ends in checkmate with the result dialog", async () => {
@@ -125,7 +125,7 @@ test('undo reverts the last move', async () => {
   fireEvent.click(screen.getByTestId('square-e5'))
   await screen.findByText('轮到白方')
 
-  fireEvent.click(screen.getByText('悔棋'))
+  fireEvent.click(screen.getByRole('button', { name: 'UNDO' }))
 
   await screen.findByText('轮到黑方')
 
@@ -150,11 +150,11 @@ test('restart resets to the initial position', async () => {
   fireEvent.click(screen.getByTestId('square-e5'))
   await screen.findByText('轮到白方')
 
-  fireEvent.click(screen.getByText('重新开始'))
+  fireEvent.click(screen.getByRole('button', { name: 'RESTART' }))
 
-  // `No moves yet` only appears once the reset has settled; the turn
+  // `NO MOVES YET` only appears once the reset has settled; the turn
   // text is already "轮到白方" before reset, so it cannot anchor the wait.
-  await screen.findByText('No moves yet')
+  await screen.findByText('NO MOVES YET')
 
   expect(screen.getByText('轮到白方')).toBeInTheDocument()
   expect(

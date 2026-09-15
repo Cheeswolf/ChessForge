@@ -1,15 +1,39 @@
 /*
- * GamePage shell styles — the live-match header and the read-only plugin
- * loadout panel. Full Pixel Forge HUD styling lands in Task 8; this file
- * only covers what Task 5 introduces.
+ * Pixel Forge live-match screen: top brand bar with plugin chips, the
+ * board column framed by player bars, and the right-hand HUD (turn
+ * panel, match info, move log, wizard NPC, controls). Everything is
+ * hard-edged: zero radius, stepped shadows, no blur.
  */
 
-.game-page-header {
+.game-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0.75rem clamp(0.75rem, 3vw, 2rem) 2rem;
+  gap: 1rem;
+}
+
+/* ---- Top bar ---- */
+
+.game-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  padding: 0.6rem 1rem;
+  background-color: #10182a;
+  border: 3px solid #6b4a16;
+  box-shadow:
+    0 0 0 2px #101827,
+    5px 5px 0 rgba(0, 0, 0, 0.42);
+}
+
+.game-topbar__brand {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.85rem;
+  margin-right: auto;
 }
 
 .game-page-brand {
@@ -24,7 +48,14 @@
     4px 4px 0 rgba(0, 0, 0, 0.4);
 }
 
-.game-page-header-actions {
+.game-topbar__match {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  color: #a9a184;
+}
+
+.game-topbar__actions {
   display: flex;
   gap: 0.5rem;
 }
@@ -54,7 +85,316 @@
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* Read-only loadout panel (frozen match config) */
+/* ---- Plugin chips ---- */
+
+.plugin-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plugin-chip {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.35rem 0.6rem;
+  background-color: #182235;
+  border: 2px solid #5c4a2f;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.plugin-chip__kind {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  color: #d9ad45;
+}
+
+.plugin-chip__name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary, #f2e7c9);
+}
+
+/* ---- Arena: board column + HUD ---- */
+
+.game-arena {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+  gap: 1.25rem;
+  align-items: start;
+  flex: 1;
+}
+
+.game-board-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.game-board-column .pixel-board-frame {
+  margin-inline: auto;
+}
+
+/* ---- Player bars ---- */
+
+.player-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 680px;
+  margin-inline: auto;
+  padding: 0.45rem 0.75rem;
+  background-color: #10182a;
+  border: 2px solid #3a2c14;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.player-bar__gem {
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: #3a2c14;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.player-bar__label {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: #a9a184;
+}
+
+.player-bar__name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted, #a9a184);
+}
+
+.player-bar--active {
+  border-color: #d9ad45;
+  box-shadow:
+    0 0 0 2px #101827,
+    3px 3px 0 rgba(0, 0, 0, 0.42);
+}
+
+.player-bar--active .player-bar__gem {
+  background-color: #d9ad45;
+}
+
+.player-bar--active .player-bar__label,
+.player-bar--active .player-bar__name {
+  color: #f2d789;
+}
+
+/* ---- HUD column ---- */
+
+.game-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.game-hud > section,
+.game-hud > .game-controls {
+  width: 100%;
+}
+
+/* Shared HUD panel chrome */
+.game-status,
+.match-info,
+.move-history,
+.wizard-guide {
+  padding: 0.75rem 0.85rem;
+  background-color: #182235;
+  border: 3px solid #6b4a16;
+  box-shadow:
+    0 0 0 2px #101827,
+    4px 4px 0 rgba(0, 0, 0, 0.42);
+}
+
+.game-status__heading,
+.match-info__heading,
+.move-history__heading {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #d9ad45;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ---- Turn panel ---- */
+
+.game-status__side {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.game-status__gem {
+  width: 0.9rem;
+  height: 0.9rem;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.game-status__gem--white {
+  background-color: #f2e7c9;
+}
+
+.game-status__gem--black {
+  background-color: #56677c;
+}
+
+.game-status__side-label {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  color: #f2e7c9;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.game-status__detail {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted, #a9a184);
+}
+
+/* ---- Match info ---- */
+
+.match-info__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.match-info__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-left: 0.55rem;
+  border-left: 3px solid #5c4a2f;
+}
+
+.match-info__row dt {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  color: #a9a184;
+}
+
+.match-info__row dd {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #f2e7c9);
+}
+
+/* ---- Move log ---- */
+
+.move-history__rows {
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.move-history__empty {
+  margin: 0;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #a9a184);
+}
+
+.move-history-row {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.22rem 0;
+  font-size: 0.85rem;
+}
+
+.move-history-row:nth-child(odd) {
+  background-color: rgba(16, 24, 39, 0.55);
+}
+
+.move-number {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.55rem;
+  align-self: center;
+  color: #d9ad45;
+}
+
+.move-white,
+.move-black {
+  font-weight: 700;
+  color: var(--text-primary, #f2e7c9);
+}
+
+.move-black {
+  color: #9eacb7;
+}
+
+/* ---- Wizard NPC ---- */
+
+.wizard-guide {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.wizard-guide__sprite {
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.wizard-guide__bubble {
+  position: relative;
+  margin: 0 0 0.4rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #101827;
+  background-color: #f2e7c9;
+  border: 2px solid #101827;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.wizard-guide__bubble::before {
+  content: '';
+  position: absolute;
+  left: -0.55rem;
+  bottom: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #f2e7c9;
+  border-left: 2px solid #101827;
+  border-bottom: 2px solid #101827;
+}
+
+/* ---- Controls ---- */
+
+.game-controls {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.game-controls > * {
+  flex: 1;
+}
+
+/* ---- Read-only loadout popover (frozen match config) ---- */
 
 .game-page-plugins {
   position: fixed;
@@ -106,4 +446,12 @@
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-primary, #f2e7c9);
+}
+
+/* ---- Mobile: stack the HUD under the board (Task 10 refines) ---- */
+
+@media (max-width: 760px) {
+  .game-arena {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

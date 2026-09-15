@@ -1,23 +1,28 @@
+import PixelButton from './PixelButton'
+
 export interface GameControlsProps {
   onUndo(): void
   onReset(): void
+  disabled?: boolean
 }
 
 /**
- * Presentational: undo (悔棋) and restart (重新开始) buttons.
+ * Presentational: UNDO / RESTART pixel buttons. Pure props in, events
+ * out — it never touches the GameCore.
  */
 export default function GameControls({
   onUndo,
   onReset,
+  disabled = false,
 }: GameControlsProps) {
   return (
     <div className="game-controls">
-      <button type="button" onClick={onUndo}>
-        悔棋
-      </button>
-      <button type="button" onClick={onReset}>
-        重新开始
-      </button>
+      <PixelButton variant="secondary" onClick={onUndo} disabled={disabled}>
+        UNDO
+      </PixelButton>
+      <PixelButton variant="primary" onClick={onReset} disabled={disabled}>
+        RESTART
+      </PixelButton>
     </div>
   )
 }

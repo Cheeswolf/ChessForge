@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { createDefaultPluginRegistry } from '../../config/defaultPluginRegistry'
 import { defaultMatchConfig } from '../../config/defaultGameConfig'
@@ -38,16 +38,71 @@ test('creates a live game from the frozen match config', () => {
   expect(screen.getByText('轮到白方')).toBeInTheDocument()
 })
 
+test('shows the Pixel Forge top bar with plugin chips', () => {
+  renderGamePage()
+
+  expect(screen.getByText('MATCH · PIXEL FORGE LOADOUT')).toBeInTheDocument()
+
+  const chips = screen.getByTestId('plugin-chips')
+  expect(within(chips).getByText('Standard Chess')).toBeInTheDocument()
+  expect(within(chips).getByText('Pixel Board')).toBeInTheDocument()
+  expect(within(chips).getByText('Pixel Forge')).toBeInTheDocument()
+  expect(within(chips).getByText('Memory Session')).toBeInTheDocument()
+})
+
+test('player bars frame the board and mark the side to move', async () => {
+  renderGamePage()
+
+  expect(screen.getByTestId('player-bar-white')).toHaveClass(
+    'player-bar--active',
+  )
+  expect(screen.getByTestId('player-bar-black')).not.toHaveClass(
+    'player-bar--active',
+  )
+
+  fireEvent.click(screen.getByTestId('square-e2'))
+  fireEvent.click(screen.getByTestId('square-e4'))
+  await screen.findByText('轮到黑方')
+
+  expect(screen.getByTestId('player-bar-black')).toHaveClass(
+    'player-bar--active',
+  )
+  expect(screen.getByTestId('player-bar-white')).not.toHaveClass(
+    'player-bar--active',
+  )
+})
+
+test('shows the match info panel in the HUD', () => {
+  renderGamePage()
+
+  const info = screen.getByTestId('match-info')
+  expect(within(info).getByText('对局信息')).toBeInTheDocument()
+  expect(within(info).getByText('Standard Chess')).toBeInTheDocument()
+  expect(within(info).getAllByText('Human')).toHaveLength(2)
+  expect(within(info).getByText('Pixel Board')).toBeInTheDocument()
+  expect(within(info).getByText('Pixel Forge')).toBeInTheDocument()
+  expect(within(info).getByText('Memory Session')).toBeInTheDocument()
+})
+
+test('wizard NPC greets the player at game start', () => {
+  renderGamePage()
+
+  expect(screen.getByTestId('wizard-guide')).toBeInTheDocument()
+  expect(screen.getByText(/让我们开始吧/)).toBeInTheDocument()
+})
+
 test('shows the active plugin loadout on demand', () => {
   renderGamePage()
 
   fireEvent.click(screen.getByRole('button', { name: '本局插件' }))
 
-  expect(screen.getByText('Standard Chess')).toBeInTheDocument()
-  expect(screen.getAllByText('Human')).toHaveLength(2)
-  expect(screen.getByText('Pixel Board')).toBeInTheDocument()
-  expect(screen.getByText('Pixel Forge')).toBeInTheDocument()
-  expect(screen.getByText('Memory Session')).toBeInTheDocument()
+  const panel = screen.getByTestId('loadout-panel')
+  expect(within(panel).getByText('CURRENT LOADOUT')).toBeInTheDocument()
+  expect(within(panel).getByText('Standard Chess')).toBeInTheDocument()
+  expect(within(panel).getAllByText('Human')).toHaveLength(2)
+  expect(within(panel).getByText('Pixel Board')).toBeInTheDocument()
+  expect(within(panel).getByText('Pixel Forge')).toBeInTheDocument()
+  expect(within(panel).getByText('Memory Session')).toBeInTheDocument()
 })
 
 test('exit button hands control back via onExit', () => {

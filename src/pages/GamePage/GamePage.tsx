@@ -7,7 +7,11 @@ import { useGameCore } from '../../hooks/useGameCore'
 import { pixelForgeTheme } from '../../plugins/themes/PixelForgeTheme'
 import { themeToCssVariables } from '../../plugins/themes/themeCss'
 import type { ThemePlugin } from '../../plugins/themes/ThemePlugin'
-import GameLayout from '../../components/GameLayout'
+import GameStatus from '../../components/GameStatus'
+import MoveHistory from '../../components/MoveHistory'
+import GameControls from '../../components/GameControls'
+import PlayerBar from '../../components/PlayerBar'
+import WizardGuide from '../../components/WizardGuide'
 import GameErrorBoundary from '../../components/GameErrorBoundary'
 import PromotionDialog from '../../components/PromotionDialog'
 import GameResultDialog from '../../components/GameResultDialog'
@@ -35,9 +39,10 @@ function resolveTheme(theme: ThemePlugin): ThemePlugin {
 
 /**
  * The live match screen. Owns everything a running game needs — GameCore
- * assembly from the frozen MatchConfig, theme variable injection, board
- * wiring and the match dialogs — and nothing about Home/Setup navigation
- * beyond the `onExit` callback.
+ * assembly from the frozen MatchConfig, theme variable injection, the
+ * Pixel Forge HUD (top bar, player bars, status/match-info/move-log/
+ * wizard/controls) and the match dialogs — and nothing about Home/Setup
+ * navigation beyond the `onExit` callback.
  */
 export default function GamePage({
   matchConfig,
@@ -103,6 +108,7 @@ export default function GamePage({
   } = useGameCore(core)
 
   const lastMove = state.history[state.history.length - 1]
+  const playing = state.status.phase === 'playing'
 
   const BoardComponent = resolved.board.Component
 
@@ -124,6 +130,12 @@ export default function GamePage({
     },
   ]
 
+  // Top-bar chips highlight the four "material" plugins; the full
+  // six-entry loadout lives in the match-info panel and loadout popover.
+  const chips = loadout.filter((entry) =>
+    ['RULE', 'BOARD', 'THEME', 'STORAGE'].includes(entry.label),
+  )
+
   return (
     <div className="game-page">
       {errorMessage && (
@@ -132,30 +144,48 @@ export default function GamePage({
         </div>
       )}
 
-      <GameLayout
-        header={
-          <div className="game-page-header">
-            <h1 className="game-page-brand">CHESSFORGE</h1>
-            <div className="game-page-header-actions">
-              <button
-                type="button"
-                className="game-page-header-btn"
-                aria-expanded={pluginsOpen}
-                onClick={() => setPluginsOpen((open) => !open)}
-              >
-                本局插件
-              </button>
-              <button
-                type="button"
-                className="game-page-header-btn"
-                onClick={onExit}
-              >
-                退出对局
-              </button>
-            </div>
-          </div>
-        }
-        board={
+      <header className="game-topbar">
+        <div className="game-topbar__brand">
+          <h1 className="game-page-brand">CHESSFORGE</h1>
+          <span className="game-topbar__match">
+            MATCH · PIXEL FORGE LOADOUT
+          </span>
+        </div>
+
+        <ul className="plugin-chips" data-testid="plugin-chips">
+          {chips.map((entry) => (
+            <li key={entry.label} className="plugin-chip">
+              <span className="plugin-chip__kind">{entry.label}</span>
+              <span className="plugin-chip__name">{entry.name}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="game-topbar__actions">
+          <button
+            type="button"
+            className="game-page-header-btn"
+            aria-expanded={pluginsOpen}
+            onClick={() => setPluginsOpen((open) => !open)}
+          >
+            本局插件
+          </button>
+          <button
+            type="button"
+            className="game-page-header-btn"
+            onClick={onExit}
+          >
+            退出对局
+          </button>
+        </div>
+      </header>
+
+      <div className="game-arena">
+        <section className="game-board-column" aria-label="棋盘">
+          <PlayerBar
+            color="black"
+            active={playing && state.status.turn === 'black'}
+          />
           <GameErrorBoundary>
             <BoardComponent
               position={state.board}
@@ -167,15 +197,41 @@ export default function GamePage({
               onMove={move}
             />
           </GameErrorBoundary>
-        }
-        status={state.status}
-        history={state.history}
-        onUndo={undo}
-        onReset={reset}
-      />
+          <PlayerBar
+            color="white"
+            active={playing && state.status.turn === 'white'}
+          />
+        </section>
+
+        <aside className="game-hud" aria-label="对局面板">
+          <GameStatus status={state.status} />
+
+          <section className="match-info" data-testid="match-info">
+            <h2 className="match-info__heading">对局信息</h2>
+            <dl className="match-info__list">
+              {loadout.map((entry) => (
+                <div key={entry.label} className="match-info__row">
+                  <dt>{entry.label}</dt>
+                  <dd>{entry.name}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <MoveHistory history={state.history} />
+
+          <WizardGuide status={state.status} history={state.history} />
+
+          <GameControls onUndo={undo} onReset={reset} />
+        </aside>
+      </div>
 
       {pluginsOpen && (
-        <section className="game-page-plugins" aria-label="本局插件配置">
+        <section
+          className="game-page-plugins"
+          data-testid="loadout-panel"
+          aria-label="本局插件配置"
+        >
           <h2 className="game-page-plugins__title">CURRENT LOADOUT</h2>
           <dl className="game-page-plugins__list">
             {loadout.map((entry) => (
