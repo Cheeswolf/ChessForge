@@ -104,11 +104,12 @@ test("fool's mate ends in checkmate with the result dialog", async () => {
   fireEvent.click(screen.getByTestId('square-h4'))
 
   const dialog = await screen.findByRole('dialog', {
-    name: '对局结束',
+    name: 'GAME OVER',
   })
   expect(dialog).toHaveTextContent('黑方获胜：将死')
-  expect(screen.getByText('再来一局')).toBeInTheDocument()
-  expect(screen.getByText('查看棋谱')).toBeInTheDocument()
+  expect(screen.getByText('PLAY AGAIN')).toBeInTheDocument()
+  expect(screen.getByText('VIEW MOVES')).toBeInTheDocument()
+  expect(screen.getByText('MAIN MENU')).toBeInTheDocument()
 
   const resultLabels = await screen.findAllByText('黑方获胜：将死')
   expect(resultLabels).toHaveLength(2)

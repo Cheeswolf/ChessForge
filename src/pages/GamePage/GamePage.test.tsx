@@ -105,13 +105,48 @@ test('shows the active plugin loadout on demand', () => {
   expect(within(panel).getByText('Memory Session')).toBeInTheDocument()
 })
 
-test('exit button hands control back via onExit', () => {
+test('exit button hands control back via onExit when no moves were played', () => {
   const onExit = vi.fn()
   renderGamePage({ onExit })
 
   fireEvent.click(screen.getByRole('button', { name: '退出对局' }))
 
   expect(onExit).toHaveBeenCalledTimes(1)
+})
+
+test('exit after a move asks for confirmation before leaving', async () => {
+  const onExit = vi.fn()
+  renderGamePage({ onExit })
+
+  fireEvent.click(screen.getByTestId('square-e2'))
+  fireEvent.click(screen.getByTestId('square-e4'))
+  await screen.findAllByText('BLACK')
+
+  fireEvent.click(screen.getByRole('button', { name: '退出对局' }))
+
+  expect(
+    screen.getByRole('dialog', { name: '退出当前对局？' }),
+  ).toBeInTheDocument()
+  expect(onExit).not.toHaveBeenCalled()
+
+  fireEvent.click(screen.getByRole('button', { name: '确认退出' }))
+
+  expect(onExit).toHaveBeenCalledTimes(1)
+})
+
+test('continuing the match closes the exit confirmation', async () => {
+  const onExit = vi.fn()
+  renderGamePage({ onExit })
+
+  fireEvent.click(screen.getByTestId('square-e2'))
+  fireEvent.click(screen.getByTestId('square-e4'))
+  await screen.findAllByText('BLACK')
+
+  fireEvent.click(screen.getByRole('button', { name: '退出对局' }))
+  fireEvent.click(screen.getByRole('button', { name: '继续对局' }))
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(onExit).not.toHaveBeenCalled()
 })
 
 test('injects the configured theme as CSS variables', () => {

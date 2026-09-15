@@ -15,6 +15,7 @@ import WizardGuide from '../../components/WizardGuide'
 import GameErrorBoundary from '../../components/GameErrorBoundary'
 import PromotionDialog from '../../components/PromotionDialog'
 import GameResultDialog from '../../components/GameResultDialog'
+import ExitMatchDialog from '../../components/ExitMatchDialog'
 import './GamePage.css'
 
 export interface GamePageProps {
@@ -68,6 +69,7 @@ export default function GamePage({
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [pluginsOpen, setPluginsOpen] = useState(false)
+  const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
 
   useEffect(() => {
     const off = core.on('error', (error) => {
@@ -109,6 +111,16 @@ export default function GamePage({
 
   const lastMove = state.history[state.history.length - 1]
   const playing = state.status.phase === 'playing'
+
+  // Leaving before the first move loses nothing, so exit immediately;
+  // once the match has started, ask first.
+  function handleExitRequest() {
+    if (state.history.length === 0) {
+      onExit()
+    } else {
+      setExitConfirmOpen(true)
+    }
+  }
 
   const BoardComponent = resolved.board.Component
 
@@ -173,7 +185,7 @@ export default function GamePage({
           <button
             type="button"
             className="game-page-header-btn"
-            onClick={onExit}
+            onClick={handleExitRequest}
           >
             退出对局
           </button>
@@ -254,19 +266,29 @@ export default function GamePage({
 
       <GameResultDialog
         status={state.status}
-        onReset={reset}
+        onPlayAgain={reset}
         onViewHistory={() => {
           const historyPanel = document.querySelector('.move-history')
           if (
             historyPanel &&
             typeof historyPanel.scrollIntoView === 'function'
           ) {
+            const reducedMotion =
+              typeof window.matchMedia === 'function' &&
+              window.matchMedia('(prefers-reduced-motion: reduce)').matches
             historyPanel.scrollIntoView({
-              behavior: 'smooth',
+              behavior: reducedMotion ? 'auto' : 'smooth',
               block: 'start',
             })
           }
         }}
+        onMainMenu={onExit}
+      />
+
+      <ExitMatchDialog
+        open={exitConfirmOpen}
+        onContinue={() => setExitConfirmOpen(false)}
+        onExit={onExit}
       />
     </div>
   )
