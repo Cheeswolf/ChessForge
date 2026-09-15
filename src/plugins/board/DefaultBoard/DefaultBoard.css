@@ -1,22 +1,70 @@
 /*
- * Default board styling. Every color is taken from a theme CSS custom
- * property (--light-square, --dark-square, --selected-square,
- * --previous-move, --legal-move, --check-square, --border-radius,
- * --shadow). No rule below hardcodes a color.
+ * Pixel Forge board styling. Square colors come from theme CSS custom
+ * properties (--light-square, --dark-square, --selected-square,
+ * --previous-move, --legal-move, --check-square); frame/material colors
+ * are app-level Pixel Forge tokens shared with Home/Setup. Everything is
+ * hard-edged: zero radius, stepped shadows, no blur, no gradients that
+ * smooth into each other.
  */
 
+.pixel-board-frame {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 1.5rem;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 680px;
+  padding: 0.6rem;
+  background-color: #10182a;
+  border: 3px solid #6b4a16;
+  border-radius: 0;
+  box-shadow:
+    0 0 0 2px #101827,
+    inset 0 0 0 2px rgba(217, 173, 69, 0.12),
+    8px 8px 0 rgba(0, 0, 0, 0.42);
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+/* Outer-frame coordinates — never repeated inside squares */
+
+.board-rank-coordinates {
+  grid-row: 1;
+  grid-column: 1;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+}
+
+.board-file-coordinates {
+  grid-row: 2;
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.board-rank-coordinates span,
+.board-file-coordinates span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.55rem;
+  color: #a9a184;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
 .board {
+  grid-row: 1;
+  grid-column: 2;
   position: relative;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   width: 100%;
-  max-width: 640px;
   aspect-ratio: 1 / 1;
-  border-radius: var(--border-radius);
+  border: 2px solid #101827;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  user-select: none;
   touch-action: none;
 }
 
@@ -25,6 +73,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -36,12 +85,44 @@
   background-color: var(--dark-square);
 }
 
-.square--selected {
-  background-color: var(--selected-square);
+/* Selected: four gold corner brackets over the square */
+
+.square--selected::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background-image:
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square)),
+    linear-gradient(var(--selected-square), var(--selected-square));
+  background-size:
+    30% 4px, 4px 30%,
+    30% 4px, 4px 30%,
+    30% 4px, 4px 30%,
+    30% 4px, 4px 30%;
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
 }
 
-.square--previous {
+/* Previous move: muted dark-gold wash under the piece */
+
+.square--previous::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-color: var(--previous-move);
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .board-piece {
@@ -56,20 +137,70 @@
   opacity: 0.3;
 }
 
-.legal-marker {
+/* Legal quiet move: small stepped green block at the square center */
+
+.legal-marker--move {
   position: absolute;
-  width: 28%;
-  height: 28%;
-  border-radius: 50%;
+  inset: 0;
+  margin: auto;
+  width: 22%;
+  height: 22%;
   background-color: var(--legal-move);
+  box-shadow:
+    0 0 0 2px rgba(16, 24, 39, 0.55),
+    3px 3px 0 rgba(0, 0, 0, 0.35);
   pointer-events: none;
 }
+
+/* Legal capture: four warning-red corner brackets framing the victim */
+
+.legal-marker--capture {
+  position: absolute;
+  inset: 2px;
+  background-image:
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c),
+    linear-gradient(#a8433c, #a8433c);
+  background-size:
+    34% 5px, 5px 34%,
+    34% 5px, 5px 34%,
+    34% 5px, 5px 34%,
+    34% 5px, 5px 34%;
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* Check: dark red wash with one short hard flash */
 
 .check-marker {
   position: absolute;
   inset: 0;
   background-color: var(--check-square);
+  opacity: 0.55;
+  animation: check-flash 480ms steps(2, end) 1;
   pointer-events: none;
+}
+
+@keyframes check-flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.55;
+  }
 }
 
 .dragging-piece {
@@ -85,4 +216,10 @@
   width: min(12vw, 3.9rem);
   height: min(12vw, 3.9rem);
   image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .check-marker {
+    animation: none;
+  }
 }

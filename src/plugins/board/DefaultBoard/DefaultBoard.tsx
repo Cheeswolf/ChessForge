@@ -126,62 +126,88 @@ export default function DefaultBoard(props: BoardPluginProps) {
   }
 
   return (
-    <div
-      className="board"
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerCancel}
-      onPointerLeave={handlePointerCancel}
-    >
-      {ALL_SQUARES.map((square) => {
-        const piece = position[square]
-        const isLegalTarget = legalTargets.has(square)
-        const isChecked = square === checkedSquare
+    <div className="pixel-board-frame">
+      <div className="board-rank-coordinates" aria-hidden="true">
+        {RANKS.map((rank) => (
+          <span key={rank} data-testid={`rank-label-${rank}`}>
+            {rank}
+          </span>
+        ))}
+      </div>
+      <div className="board-file-coordinates" aria-hidden="true">
+        {FILES.map((file) => (
+          <span key={file} data-testid={`file-label-${file}`}>
+            {file}
+          </span>
+        ))}
+      </div>
+      <div
+        className="board"
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        onPointerLeave={handlePointerCancel}
+      >
+        {ALL_SQUARES.map((square) => {
+          const piece = position[square]
+          const legalMove = legalMoves.find(
+            (move) => move.from === selectedSquare && move.to === square,
+          )
+          const isCaptureTarget = Boolean(legalMove && position[square])
+          const isChecked = square === checkedSquare
 
-        const classes = [
-          'square',
-          isLightSquare(square) ? 'square--light' : 'square--dark',
-        ]
-        if (square === selectedSquare) classes.push('square--selected')
-        if (
-          lastMove &&
-          (square === lastMove.from || square === lastMove.to)
-        ) {
-          classes.push('square--previous')
-        }
-        if (drag && drag.from === square) {
-          classes.push('square--drag-source')
-        }
+          const classes = [
+            'square',
+            isLightSquare(square) ? 'square--light' : 'square--dark',
+          ]
+          if (square === selectedSquare) classes.push('square--selected')
+          if (
+            lastMove &&
+            (square === lastMove.from || square === lastMove.to)
+          ) {
+            classes.push('square--previous')
+          }
+          if (drag && drag.from === square) {
+            classes.push('square--drag-source')
+          }
 
-        return (
-          <div
-            key={square}
-            data-square={square}
-            data-testid={`square-${square}`}
-            className={classes.join(' ')}
-            onClick={() => handleSquareClick(square)}
-            onPointerDown={(e) => handlePointerDown(e, square)}
+          return (
+            <div
+              key={square}
+              data-square={square}
+              data-testid={`square-${square}`}
+              className={classes.join(' ')}
+              onClick={() => handleSquareClick(square)}
+              onPointerDown={(e) => handlePointerDown(e, square)}
+            >
+              {legalMove && (
+                <span
+                  className={
+                    isCaptureTarget
+                      ? 'legal-marker legal-marker--capture'
+                      : 'legal-marker legal-marker--move'
+                  }
+                  aria-hidden="true"
+                />
+              )}
+              {isChecked && (
+                <span className="check-marker" aria-hidden="true" />
+              )}
+              {piece && <PixelPiece piece={piece} className="board-piece" />}
+            </div>
+          )
+        })}
+
+        {drag && (
+          <span
+            className="dragging-piece"
+            style={{ left: drag.x, top: drag.y }}
+            aria-hidden="true"
           >
-            {isLegalTarget && (
-              <span className="legal-marker" aria-hidden="true" />
-            )}
-            {isChecked && (
-              <span className="check-marker" aria-hidden="true" />
-            )}
-            {piece && <PixelPiece piece={piece} className="board-piece" />}
-          </div>
-        )
-      })}
-
-      {drag && (
-        <span
-          className="dragging-piece"
-          style={{ left: drag.x, top: drag.y }}
-          aria-hidden="true"
-        >
-          <PixelPiece piece={drag.piece} className="dragging-piece__sprite" />
-        </span>
-      )}
+            <PixelPiece piece={drag.piece} className="dragging-piece__sprite" />
+          </span>
+        )}
+      </div>
     </div>
   )
 }
