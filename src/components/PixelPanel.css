@@ -1,0 +1,5 @@
+.pixel-panel {
+  background-color: var(--panel-background, #182235);
+  border: 3px solid #2f3d52;
+  box-shadow: var(--shadow, 4px 4px 0 rgba(0, 0, 0, 0.42));
+}

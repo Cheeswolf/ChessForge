@@ -30,9 +30,11 @@ export default class GameErrorBoundary extends Component<
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div role="alert" className="board-error">
-          <div>棋盘加载失败</div>
-          <div>请重新开始游戏</div>
+        <div role="alert" className="pixel-error-panel">
+          <div className="pixel-error-panel__title">BOARD MODULE ERROR</div>
+          <div className="pixel-error-panel__hint">
+            棋盘加载失败，请重新开始游戏
+          </div>
         </div>
       )
     }

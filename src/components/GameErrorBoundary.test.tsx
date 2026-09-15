@@ -34,7 +34,8 @@ test('catches a crashing child and renders the fallback while the rest of the tr
     </div>,
   )
 
-  expect(screen.getByText('棋盘加载失败')).toBeInTheDocument()
-  expect(screen.getByText('请重新开始游戏')).toBeInTheDocument()
+  expect(screen.getByRole('alert')).toHaveClass('pixel-error-panel')
+  expect(screen.getByText('BOARD MODULE ERROR')).toBeInTheDocument()
+  expect(screen.getByText('棋盘加载失败，请重新开始游戏')).toBeInTheDocument()
   expect(screen.getByText('outside survives')).toBeInTheDocument()
 })

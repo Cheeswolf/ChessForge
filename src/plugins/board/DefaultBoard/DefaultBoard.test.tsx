@@ -41,7 +41,7 @@ describe('DefaultBoard', () => {
     }
   })
 
-  test('renders piece glyphs from the position', () => {
+  test('renders pixel pieces from the position', () => {
     renderBoard({
       position: {
         e1: { color: 'white', type: 'king' },
@@ -50,9 +50,15 @@ describe('DefaultBoard', () => {
       },
     })
 
-    expect(screen.getByTestId('square-e1')).toHaveTextContent('♔')
-    expect(screen.getByTestId('square-e2')).toHaveTextContent('♙')
-    expect(screen.getByTestId('square-e7')).toHaveTextContent('♟')
+    expect(
+      screen.getByTestId('square-e1').querySelector('[data-piece="white-king"]'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e2').querySelector('[data-piece="white-pawn"]'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e7').querySelector('[data-piece="black-pawn"]'),
+    ).not.toBeNull()
   })
 
   test('calls onSquareSelect when clicking a square', async () => {
@@ -64,6 +70,44 @@ describe('DefaultBoard', () => {
     await user.click(screen.getByTestId('square-e2'))
 
     expect(onSquareSelect).toHaveBeenCalledWith('e2')
+  })
+
+  test('shows file and rank coordinates on the outer frame only', () => {
+    renderBoard()
+
+    expect(screen.getByTestId('file-label-a')).toHaveTextContent('a')
+    expect(screen.getByTestId('file-label-h')).toHaveTextContent('h')
+    expect(screen.getByTestId('rank-label-8')).toHaveTextContent('8')
+    expect(screen.getByTestId('rank-label-1')).toHaveTextContent('1')
+    // Squares themselves never carry algebraic coordinate text.
+    expect(screen.getByTestId('square-e4')).not.toHaveTextContent('e4')
+  })
+
+  test('uses distinct markers for quiet moves and captures', () => {
+    renderBoard({
+      position: {
+        e2: { color: 'white', type: 'pawn' },
+        d5: { color: 'black', type: 'pawn' },
+      },
+      selectedSquare: 'e2',
+      legalMoves: [
+        { from: 'e2', to: 'e4' },
+        { from: 'e2', to: 'd5' },
+      ],
+    })
+
+    expect(
+      screen.getByTestId('square-e4').querySelector('.legal-marker--move'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e4').querySelector('.legal-marker--capture'),
+    ).toBeNull()
+    expect(
+      screen.getByTestId('square-d5').querySelector('.legal-marker--capture'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-d5').querySelector('.legal-marker--move'),
+    ).toBeNull()
   })
 
   test('shows a legal marker on each legal target', () => {
@@ -152,8 +196,12 @@ describe('DefaultBoard', () => {
     expect(onMove).toHaveBeenCalledWith({ from: 'e2', to: 'e5' })
     // The canonical position prop is unchanged, so the pawn is still
     // rendered on e2 and not on e5.
-    expect(screen.getByTestId('square-e2')).toHaveTextContent('♙')
-    expect(screen.getByTestId('square-e5')).not.toHaveTextContent('♙')
+    expect(
+      screen.getByTestId('square-e2').querySelector('[data-piece="white-pawn"]'),
+    ).not.toBeNull()
+    expect(
+      screen.getByTestId('square-e5').querySelector('[data-piece]'),
+    ).toBeNull()
   })
 
   test('highlights the from and to squares of the last move', () => {
@@ -183,9 +231,9 @@ describe('DefaultBoard', () => {
 })
 
 describe('defaultBoardPlugin', () => {
-  test('exposes id, name and a Component', () => {
-    expect(defaultBoardPlugin.id).toBeTruthy()
-    expect(defaultBoardPlugin.name).toBeTruthy()
+  test('keeps the stable id and exposes the Pixel Board name', () => {
+    expect(defaultBoardPlugin.id).toBe('default-board')
+    expect(defaultBoardPlugin.name).toBe('Pixel Board')
     expect(defaultBoardPlugin.Component).toBeTruthy()
   })
 })

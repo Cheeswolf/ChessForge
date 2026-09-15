@@ -6,6 +6,7 @@ import { chessComTheme } from '../plugins/themes/ChessComTheme'
 import { defaultBoardPlugin } from '../plugins/board/DefaultBoardPlugin'
 import type { ThemePlugin } from '../plugins/themes/ThemePlugin'
 import type { BoardPlugin } from '../plugins/board/BoardPlugin'
+import type { MatchConfig } from '../app/MatchConfig'
 
 /**
  * App-level config: a superset of GameConfig that additionally carries
@@ -30,4 +31,13 @@ export const defaultGameConfig: AppGameConfig = {
   theme: chessComTheme,
 
   board: defaultBoardPlugin,
+}
+
+export const defaultMatchConfig: MatchConfig = {
+  ruleId: 'chessjs-rule',
+  whitePlayerId: 'human-player',
+  blackPlayerId: 'human-player',
+  boardId: 'default-board',
+  themeId: 'pixel-forge-theme',
+  storageId: 'memory-storage',
 }

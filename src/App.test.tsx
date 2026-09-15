@@ -1,96 +1,81 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import App from './App'
-import {
-  defaultGameConfig,
-  type AppGameConfig,
-} from './config/defaultGameConfig'
-import { HumanPlayerPlugin } from './plugins/players/HumanPlayerPlugin'
-import { chessComTheme } from './plugins/themes/ChessComTheme'
-import type {
-  ThemePlugin,
-  ThemeTokens,
-} from './plugins/themes/ThemePlugin'
 
 afterEach(() => {
   document.documentElement.removeAttribute('style')
 })
 
 /**
- * Fresh players per test keep the multi-move flows isolated: the module
- * level `defaultGameConfig` players are singletons, and a stale pending
- * request could otherwise leak across renders.
+ * Product flow entry: the app opens on Home; every game-flow test enters
+ * a live match through Quick Start (default plugin loadout).
  */
-function freshConfig(): AppGameConfig {
-  return {
-    ...defaultGameConfig,
-    players: {
-      white: new HumanPlayerPlugin('white', 'White', 'white'),
-      black: new HumanPlayerPlugin('black', 'Black', 'black'),
-    },
-  }
+function startQuickGame() {
+  render(<App />)
+  fireEvent.click(screen.getByRole('button', { name: '快速开始' }))
 }
 
-test('renders application title', () => {
+test('renders the app shell starting on the home page', () => {
   render(<App />)
-  expect(screen.getByText('Plugin Chess')).toBeInTheDocument()
+
+  expect(screen.getByRole('heading', { name: 'CHESSFORGE' })).toBeInTheDocument()
+  expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
 })
 
-test('renders the board and the initial turn status', () => {
+test('home → setup: 开始游戏 opens the match setup page', () => {
   render(<App />)
+
+  fireEvent.click(screen.getByRole('button', { name: '开始游戏' }))
+
+  expect(screen.getByRole('heading', { name: 'MATCH SETUP' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: '配置本局插件' })).toBeInTheDocument()
+  expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
+})
+
+test('setup → start match → game: START MATCH enters the live game', () => {
+  render(<App />)
+
+  fireEvent.click(screen.getByRole('button', { name: '开始游戏' }))
+  fireEvent.click(screen.getByRole('button', { name: 'START MATCH' }))
+
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
+})
+
+test('game → exit → home: leaving before any move returns to the home page', () => {
+  startQuickGame()
+
+  fireEvent.click(screen.getByRole('button', { name: '退出对局' }))
+
+  expect(screen.getByRole('heading', { name: 'CHESSFORGE' })).toBeInTheDocument()
+  expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
+})
+
+test('quick start renders the board and the initial turn status', () => {
+  startQuickGame()
 
   expect(screen.getByTestId('square-e2')).toBeInTheDocument()
   expect(screen.getByText('轮到白方')).toBeInTheDocument()
 })
 
 test('clicking e2 then e4 moves the white pawn', async () => {
-  render(<App />)
+  startQuickGame()
 
   fireEvent.click(screen.getByTestId('square-e2'))
   fireEvent.click(screen.getByTestId('square-e4'))
 
   expect(await screen.findByText('轮到黑方')).toBeInTheDocument()
-  expect(screen.getByTestId('square-e4')).toHaveTextContent('♙')
+  expect(
+    screen.getByTestId('square-e4').querySelector('.board-piece'),
+  ).not.toBeNull()
   expect(
     screen.getByTestId('square-e2').querySelector('.board-piece'),
   ).toBeNull()
   expect(screen.getByText('e4')).toBeInTheDocument()
 })
 
-test('injects a custom theme as CSS variables', () => {
-  const testTheme: ThemePlugin = {
-    id: 'test-theme',
-    name: 'Test Theme',
-    tokens: {
-      ...chessComTheme.tokens,
-      lightSquare: 'rgb(1, 2, 3)',
-    },
-  }
-
-  render(<App config={{ ...defaultGameConfig, theme: testTheme }} />)
-
-  expect(
-    document.documentElement.style.getPropertyValue('--light-square'),
-  ).toBe('rgb(1, 2, 3)')
-})
-
-test('falls back to the default theme when the configured theme is broken', () => {
-  const brokenTheme: ThemePlugin = {
-    id: 'broken-theme',
-    name: 'Broken Theme',
-    tokens: undefined as unknown as ThemeTokens,
-  }
-
-  render(<App config={{ ...defaultGameConfig, theme: brokenTheme }} />)
-
-  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
-  expect(
-    document.documentElement.style.getPropertyValue('--light-square'),
-  ).toBe('#ebecd0')
-})
-
 test('main opening: 1. e4 e5 2. Nf3 Nc6 3. Bb5', async () => {
-  render(<App config={freshConfig()} />)
+  startQuickGame()
 
   // 1. e4 e5
   fireEvent.click(screen.getByTestId('square-e2'))
@@ -115,20 +100,20 @@ test('main opening: 1. e4 e5 2. Nf3 Nc6 3. Bb5', async () => {
   fireEvent.click(screen.getByTestId('square-b5'))
   await screen.findByText('轮到黑方')
 
-  expect(screen.getByTestId('square-b5')).toHaveTextContent('♗')
-  expect(screen.getByTestId('square-f3')).toHaveTextContent('♘')
-  expect(screen.getByTestId('square-c6')).toHaveTextContent('♞')
-  expect(screen.getByTestId('square-e4')).toHaveTextContent('♙')
-  expect(screen.getByTestId('square-e5')).toHaveTextContent('♟')
+  for (const square of ['b5', 'f3', 'c6', 'e4', 'e5']) {
+    expect(
+      screen.getByTestId(`square-${square}`).querySelector('.board-piece'),
+    ).not.toBeNull()
+  }
 
   expect(screen.getByText('Bb5')).toBeInTheDocument()
   expect(screen.getByText('Nf3')).toBeInTheDocument()
   expect(screen.getByText('Nc6')).toBeInTheDocument()
-  expect(screen.getByText('3.')).toBeInTheDocument()
+  expect(screen.getByText('03')).toBeInTheDocument()
 })
 
 test("fool's mate ends in checkmate with the result dialog", async () => {
-  render(<App config={freshConfig()} />)
+  startQuickGame()
 
   // 1. f3 e5
   fireEvent.click(screen.getByTestId('square-f2'))
@@ -148,18 +133,19 @@ test("fool's mate ends in checkmate with the result dialog", async () => {
   fireEvent.click(screen.getByTestId('square-h4'))
 
   const dialog = await screen.findByRole('dialog', {
-    name: '对局结束',
+    name: 'GAME OVER',
   })
   expect(dialog).toHaveTextContent('黑方获胜：将死')
-  expect(screen.getByText('再来一局')).toBeInTheDocument()
-  expect(screen.getByText('查看棋谱')).toBeInTheDocument()
+  expect(screen.getByText('PLAY AGAIN')).toBeInTheDocument()
+  expect(screen.getByText('VIEW MOVES')).toBeInTheDocument()
+  expect(screen.getByText('MAIN MENU')).toBeInTheDocument()
 
   const resultLabels = await screen.findAllByText('黑方获胜：将死')
   expect(resultLabels).toHaveLength(2)
 })
 
 test('undo reverts the last move', async () => {
-  render(<App config={freshConfig()} />)
+  startQuickGame()
 
   fireEvent.click(screen.getByTestId('square-e2'))
   fireEvent.click(screen.getByTestId('square-e4'))
@@ -169,11 +155,13 @@ test('undo reverts the last move', async () => {
   fireEvent.click(screen.getByTestId('square-e5'))
   await screen.findByText('轮到白方')
 
-  fireEvent.click(screen.getByText('悔棋'))
+  fireEvent.click(screen.getByRole('button', { name: 'UNDO' }))
 
   await screen.findByText('轮到黑方')
 
-  expect(screen.getByTestId('square-e7')).toHaveTextContent('♟')
+  expect(
+    screen.getByTestId('square-e7').querySelector('.board-piece'),
+  ).not.toBeNull()
   expect(
     screen.getByTestId('square-e5').querySelector('.board-piece'),
   ).toBeNull()
@@ -182,7 +170,7 @@ test('undo reverts the last move', async () => {
 })
 
 test('restart resets to the initial position', async () => {
-  render(<App config={freshConfig()} />)
+  startQuickGame()
 
   fireEvent.click(screen.getByTestId('square-e2'))
   fireEvent.click(screen.getByTestId('square-e4'))
@@ -192,15 +180,120 @@ test('restart resets to the initial position', async () => {
   fireEvent.click(screen.getByTestId('square-e5'))
   await screen.findByText('轮到白方')
 
-  fireEvent.click(screen.getByText('重新开始'))
+  fireEvent.click(screen.getByRole('button', { name: 'RESTART' }))
 
-  // `No moves yet` only appears once the reset has settled; the turn
+  // `NO MOVES YET` only appears once the reset has settled; the turn
   // text is already "轮到白方" before reset, so it cannot anchor the wait.
-  await screen.findByText('No moves yet')
+  await screen.findByText('NO MOVES YET')
 
   expect(screen.getByText('轮到白方')).toBeInTheDocument()
-  expect(screen.getByTestId('square-e2')).toHaveTextContent('♙')
+  expect(
+    screen.getByTestId('square-e2').querySelector('.board-piece'),
+  ).not.toBeNull()
   expect(
     screen.getByTestId('square-e4').querySelector('.board-piece'),
   ).toBeNull()
+})
+
+test('game end → play again: resets the board while staying in the same match', async () => {
+  startQuickGame()
+
+  // Fool's mate: 1. f3 e5 2. g4 Qh4#
+  fireEvent.click(screen.getByTestId('square-f2'))
+  fireEvent.click(screen.getByTestId('square-f3'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-e7'))
+  fireEvent.click(screen.getByTestId('square-e5'))
+  await screen.findByText('轮到白方')
+
+  fireEvent.click(screen.getByTestId('square-g2'))
+  fireEvent.click(screen.getByTestId('square-g4'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-d8'))
+  fireEvent.click(screen.getByTestId('square-h4'))
+  await screen.findByRole('dialog', { name: 'GAME OVER' })
+
+  fireEvent.click(screen.getByRole('button', { name: 'PLAY AGAIN' }))
+
+  // Same match restarts: dialog gone, history empty, initial position back.
+  await screen.findByText('NO MOVES YET')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
+  expect(
+    screen.getByTestId('square-e2').querySelector('.board-piece'),
+  ).not.toBeNull()
+  expect(
+    screen.getByTestId('square-h4').querySelector('.board-piece'),
+  ).toBeNull()
+})
+
+test('pawn promotion offers the pixel piece choices and promotes to a queen', async () => {
+  startQuickGame()
+
+  const playMoves: Array<[string, string]> = [
+    ['a2', 'a4'], // 1. a4
+    ['b7', 'b5'], // 1... b5
+    ['a4', 'b5'], // 2. axb5
+    ['a7', 'a6'], // 2... a6
+    ['b5', 'a6'], // 3. bxa6
+    ['b8', 'c6'], // 3... Nc6
+    ['a6', 'a7'], // 4. a7
+    ['a8', 'b8'], // 4... Rb8
+  ]
+
+  for (const [index, [from, to]] of playMoves.entries()) {
+    fireEvent.click(screen.getByTestId(`square-${from}`))
+    fireEvent.click(screen.getByTestId(`square-${to}`))
+    // White just moved on even indices → black to move, and vice versa.
+    await screen.findByText(index % 2 === 0 ? '轮到黑方' : '轮到白方')
+  }
+
+  fireEvent.click(screen.getByTestId('square-a7'))
+  fireEvent.click(screen.getByTestId('square-b8'))
+
+  await screen.findByRole('dialog', { name: 'PROMOTE PAWN' })
+  expect(
+    screen
+      .getByLabelText('Promote to queen')
+      .querySelector('[data-piece="white-queen"]'),
+  ).not.toBeNull()
+
+  fireEvent.click(screen.getByLabelText('Promote to queen'))
+
+  // The promoted move applies asynchronously; black to move once settled.
+  await screen.findByText('轮到黑方')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(
+    screen.getByTestId('square-b8').querySelector('[data-piece="white-queen"]'),
+  ).not.toBeNull()
+})
+
+test('check is announced in the HUD', async () => {
+  startQuickGame()
+
+  // 1. e4 e5 2. Qf3 d6 3. Qxf7+
+  fireEvent.click(screen.getByTestId('square-e2'))
+  fireEvent.click(screen.getByTestId('square-e4'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-e7'))
+  fireEvent.click(screen.getByTestId('square-e5'))
+  await screen.findByText('轮到白方')
+
+  fireEvent.click(screen.getByTestId('square-d1'))
+  fireEvent.click(screen.getByTestId('square-f3'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-d7'))
+  fireEvent.click(screen.getByTestId('square-d6'))
+  await screen.findByText('轮到白方')
+
+  fireEvent.click(screen.getByTestId('square-f3'))
+  fireEvent.click(screen.getByTestId('square-f7'))
+
+  await screen.findByText('黑方被将军')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })

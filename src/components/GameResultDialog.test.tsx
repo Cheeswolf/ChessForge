@@ -8,54 +8,61 @@ function playing(): GameStatus {
   return { phase: 'playing', turn: 'white', inCheck: false }
 }
 
+function renderResult(overrides: Partial<Parameters<typeof GameResultDialog>[0]> = {}) {
+  const props = {
+    status: playing(),
+    onPlayAgain: () => {},
+    onViewHistory: () => {},
+    onMainMenu: () => {},
+    ...overrides,
+  }
+  render(<GameResultDialog {...props} />)
+  return props
+}
+
 describe('GameResultDialog', () => {
   test('renders nothing while playing', () => {
-    render(
-      <GameResultDialog
-        status={playing()}
-        onReset={() => {}}
-        onViewHistory={() => {}}
-      />,
-    )
+    renderResult()
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  test('shows the checkmate result and wires both actions', async () => {
+  test('shows the GAME OVER dialog with the checkmate result and all three actions', async () => {
     const user = userEvent.setup()
-    const onReset = vi.fn()
+    const onPlayAgain = vi.fn()
     const onViewHistory = vi.fn()
+    const onMainMenu = vi.fn()
 
-    render(
-      <GameResultDialog
-        status={{
-          phase: 'checkmate',
-          turn: 'white',
-          inCheck: true,
-          winner: 'black',
-        }}
-        onReset={onReset}
-        onViewHistory={onViewHistory}
-      />,
-    )
+    renderResult({
+      status: {
+        phase: 'checkmate',
+        turn: 'white',
+        inCheck: true,
+        winner: 'black',
+      },
+      onPlayAgain,
+      onViewHistory,
+      onMainMenu,
+    })
 
+    expect(
+      screen.getByRole('dialog', { name: 'GAME OVER' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('黑方获胜：将死')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '再来一局' }))
-    await user.click(screen.getByRole('button', { name: '查看棋谱' }))
+    await user.click(screen.getByRole('button', { name: 'PLAY AGAIN' }))
+    await user.click(screen.getByRole('button', { name: 'VIEW MOVES' }))
+    await user.click(screen.getByRole('button', { name: 'MAIN MENU' }))
 
-    expect(onReset).toHaveBeenCalledTimes(1)
+    expect(onPlayAgain).toHaveBeenCalledTimes(1)
     expect(onViewHistory).toHaveBeenCalledTimes(1)
+    expect(onMainMenu).toHaveBeenCalledTimes(1)
   })
 
   test('shows the draw result', () => {
-    render(
-      <GameResultDialog
-        status={{ phase: 'draw', turn: 'white', inCheck: false }}
-        onReset={() => {}}
-        onViewHistory={() => {}}
-      />,
-    )
+    renderResult({
+      status: { phase: 'draw', turn: 'white', inCheck: false },
+    })
 
     expect(screen.getByText('和棋')).toBeInTheDocument()
   })

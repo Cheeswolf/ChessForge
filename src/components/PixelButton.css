@@ -1,0 +1,58 @@
+.pixel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: 3px solid;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.42);
+  transition: transform 80ms steps(2, end), box-shadow 80ms steps(2, end);
+}
+
+.pixel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pixel-button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.42);
+}
+
+.pixel-button--primary {
+  color: #2a1d0d;
+  background-color: #d9ad45;
+  border-color: #b88a2d;
+}
+
+.pixel-button--primary:hover:not(:disabled) {
+  background-color: #e6bf5c;
+}
+
+.pixel-button--secondary {
+  color: var(--text-primary, #f2e7c9);
+  background-color: #1f2b3d;
+  border-color: #5c4a2f;
+}
+
+.pixel-button--secondary:hover:not(:disabled) {
+  background-color: #2a3a52;
+}
+
+.pixel-button--danger {
+  color: #fff;
+  background-color: #8b3434;
+  border-color: #5c2020;
+}
+
+.pixel-button--danger:hover:not(:disabled) {
+  background-color: #a84444;
+}
