@@ -13,7 +13,7 @@
 }
 
 /*
- * Default theme (Chess.com style). These CSS custom properties are the
+ * Default theme (Pixel Forge). These CSS custom properties are the
  * fallback values; at runtime a theme plugin overrides them via
  * `themeToCssVariables(theme)` injected onto the root element.
  * No rule below hardcodes a color outside these variables.
@@ -23,21 +23,21 @@
   --font-body: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', system-ui,
     sans-serif;
 
-  --page-background: #312e2b;
-  --panel-background: #262421;
-  --text-primary: #ffffff;
-  --text-muted: #9a9a9a;
+  --page-background: #111827;
+  --panel-background: #182235;
+  --text-primary: #f2e7c9;
+  --text-muted: #a9a184;
 
-  --light-square: #ebecd0;
-  --dark-square: #779556;
+  --light-square: #d8c39a;
+  --dark-square: #75533b;
 
-  --selected-square: #f6f669;
-  --previous-move: #cdd26a;
-  --legal-move: rgba(20, 85, 30, 0.5);
-  --check-square: rgba(255, 0, 0, 0.5);
+  --selected-square: #d9ad45;
+  --previous-move: #9a7938;
+  --legal-move: #4e8f78;
+  --check-square: #8b3434;
 
-  --border-radius: 4px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --border-radius: 0px;
+  --shadow: 4px 4px 0 rgba(0, 0, 0, 0.42);
 
   font-family: var(--font-body);
   line-height: 1.5;
@@ -59,8 +59,26 @@ body {
   background-color: var(--page-background);
 }
 
+button,
+select {
+  font: inherit;
+}
+
 #root {
   min-height: 100vh;
+}
+
+/* Global reduced-motion: every animation/transition collapses to an
+   instant, single-iteration step; scripted smooth scrolling goes auto. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ---- Error banner ---- */
@@ -194,29 +212,38 @@ body {
   gap: 0.6rem;
 }
 
-/* ---- Board error fallback ---- */
+/* ---- Board error fallback (Pixel Forge panel) ---- */
 
-.board-error {
+.pixel-error-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 680px;
   min-height: 16rem;
+  margin-inline: auto;
   padding: 1.5rem;
   text-align: center;
   color: var(--text-primary);
   background-color: var(--panel-background);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  border: 3px solid #8b3434;
+  border-radius: 0;
+  box-shadow:
+    0 0 0 2px #101827,
+    6px 6px 0 rgba(0, 0, 0, 0.42);
 }
 
-.board-error div:first-child {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
+.pixel-error-panel__title {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  color: #e07070;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
-.board-error div:last-child {
+.pixel-error-panel__hint {
+  font-size: 0.85rem;
   color: var(--text-muted);
 }

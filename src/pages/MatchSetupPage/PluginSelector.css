@@ -114,7 +114,7 @@
   border-color: #d9ad45;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 520px) {
   .plugin-selector {
     flex-direction: column;
     align-items: stretch;

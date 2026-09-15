@@ -339,3 +339,17 @@
     justify-content: center;
   }
 }
+
+/* Narrow phones: selectors stack (PluginSelector.css) and every action
+   button goes full width. */
+@media (max-width: 520px) {
+  .match-setup-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .match-setup-start-btn,
+  .match-setup-reset-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
