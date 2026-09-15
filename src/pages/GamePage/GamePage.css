@@ -1,0 +1,109 @@
+/*
+ * GamePage shell styles — the live-match header and the read-only plugin
+ * loadout panel. Full Pixel Forge HUD styling lands in Task 8; this file
+ * only covers what Task 5 introduces.
+ */
+
+.game-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.game-page-brand {
+  margin: 0;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #f2d789;
+  text-shadow:
+    2px 2px 0 #8a6e2f,
+    4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.game-page-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game-page-header-btn {
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-body, 'Segoe UI', 'Microsoft YaHei', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #f2e7c9);
+  background-color: #1f2b3d;
+  border: 2px solid #5c4a2f;
+  border-radius: 0;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition:
+    transform 80ms steps(2, end),
+    background-color 80ms steps(2, end);
+}
+
+.game-page-header-btn:hover {
+  background-color: #2a3a52;
+}
+
+.game-page-header-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Read-only loadout panel (frozen match config) */
+
+.game-page-plugins {
+  position: fixed;
+  top: 4.5rem;
+  right: 1rem;
+  z-index: 60;
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 1rem 1.25rem;
+  background-color: var(--panel-background, #182235);
+  border: 3px solid #6b4a16;
+  box-shadow:
+    0 0 0 2px #101827,
+    6px 6px 0 rgba(0, 0, 0, 0.42);
+}
+
+.game-page-plugins__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #d9ad45;
+}
+
+.game-page-plugins__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.game-page-plugins__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-left: 0.6rem;
+  border-left: 3px solid #5c4a2f;
+}
+
+.game-page-plugins__item dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted, #a9a184);
+}
+
+.game-page-plugins__item dd {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary, #f2e7c9);
+}

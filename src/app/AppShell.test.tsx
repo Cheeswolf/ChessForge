@@ -31,13 +31,14 @@ test('match setup flow: start setup and launch a match', () => {
   expect(screen.getByRole('heading', { name: '配置本局插件' })).toBeInTheDocument()
 
   fireEvent.click(screen.getByRole('button', { name: 'START MATCH' }))
-  expect(screen.getByTestId('game-page-placeholder')).toBeInTheDocument()
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
 })
 
-test('clicking "快速开始" jumps straight to the game placeholder', () => {
+test('clicking "快速开始" jumps straight into a live game', () => {
   render(<AppShell />)
 
   fireEvent.click(screen.getByRole('button', { name: '快速开始' }))
 
-  expect(screen.getByTestId('game-page-placeholder')).toHaveTextContent('GAME')
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
 })

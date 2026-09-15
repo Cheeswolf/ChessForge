@@ -4,6 +4,7 @@ import { themeToCssVariables } from '../plugins/themes/themeCss'
 import { pixelForgeTheme } from '../plugins/themes/PixelForgeTheme'
 import HomePage from '../pages/HomePage/HomePage'
 import MatchSetupPage from '../pages/MatchSetupPage/MatchSetupPage'
+import GamePage from '../pages/GamePage/GamePage'
 import { createDefaultPluginRegistry } from '../config/defaultPluginRegistry'
 import type { MatchConfig } from './MatchConfig'
 import type { AppScreen } from './AppScreen'
@@ -65,13 +66,20 @@ export default function AppShell() {
       )
 
     case 'game':
+      if (activeMatchConfig) {
+        return (
+          <GamePage
+            matchConfig={activeMatchConfig}
+            registry={registry}
+            onExit={() => {
+              setActiveMatchConfig(null)
+              setScreen('home')
+            }}
+          />
+        )
+      }
       return (
-        <div
-          data-testid="game-page-placeholder"
-          data-rule={activeMatchConfig?.ruleId}
-        >
-          GAME
-        </div>
+        <HomePage onStartSetup={startSetup} onQuickStart={quickStart} />
       )
   }
 }
