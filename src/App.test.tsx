@@ -22,6 +22,35 @@ test('renders the app shell starting on the home page', () => {
   expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
 })
 
+test('home → setup: 开始游戏 opens the match setup page', () => {
+  render(<App />)
+
+  fireEvent.click(screen.getByRole('button', { name: '开始游戏' }))
+
+  expect(screen.getByRole('heading', { name: 'MATCH SETUP' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: '配置本局插件' })).toBeInTheDocument()
+  expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
+})
+
+test('setup → start match → game: START MATCH enters the live game', () => {
+  render(<App />)
+
+  fireEvent.click(screen.getByRole('button', { name: '开始游戏' }))
+  fireEvent.click(screen.getByRole('button', { name: 'START MATCH' }))
+
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
+})
+
+test('game → exit → home: leaving before any move returns to the home page', () => {
+  startQuickGame()
+
+  fireEvent.click(screen.getByRole('button', { name: '退出对局' }))
+
+  expect(screen.getByRole('heading', { name: 'CHESSFORGE' })).toBeInTheDocument()
+  expect(screen.queryByTestId('square-e2')).not.toBeInTheDocument()
+})
+
 test('quick start renders the board and the initial turn status', () => {
   startQuickGame()
 
@@ -164,4 +193,107 @@ test('restart resets to the initial position', async () => {
   expect(
     screen.getByTestId('square-e4').querySelector('.board-piece'),
   ).toBeNull()
+})
+
+test('game end → play again: resets the board while staying in the same match', async () => {
+  startQuickGame()
+
+  // Fool's mate: 1. f3 e5 2. g4 Qh4#
+  fireEvent.click(screen.getByTestId('square-f2'))
+  fireEvent.click(screen.getByTestId('square-f3'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-e7'))
+  fireEvent.click(screen.getByTestId('square-e5'))
+  await screen.findByText('轮到白方')
+
+  fireEvent.click(screen.getByTestId('square-g2'))
+  fireEvent.click(screen.getByTestId('square-g4'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-d8'))
+  fireEvent.click(screen.getByTestId('square-h4'))
+  await screen.findByRole('dialog', { name: 'GAME OVER' })
+
+  fireEvent.click(screen.getByRole('button', { name: 'PLAY AGAIN' }))
+
+  // Same match restarts: dialog gone, history empty, initial position back.
+  await screen.findByText('NO MOVES YET')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.getByText('轮到白方')).toBeInTheDocument()
+  expect(screen.getByTestId('square-e2')).toBeInTheDocument()
+  expect(
+    screen.getByTestId('square-e2').querySelector('.board-piece'),
+  ).not.toBeNull()
+  expect(
+    screen.getByTestId('square-h4').querySelector('.board-piece'),
+  ).toBeNull()
+})
+
+test('pawn promotion offers the pixel piece choices and promotes to a queen', async () => {
+  startQuickGame()
+
+  const playMoves: Array<[string, string]> = [
+    ['a2', 'a4'], // 1. a4
+    ['b7', 'b5'], // 1... b5
+    ['a4', 'b5'], // 2. axb5
+    ['a7', 'a6'], // 2... a6
+    ['b5', 'a6'], // 3. bxa6
+    ['b8', 'c6'], // 3... Nc6
+    ['a6', 'a7'], // 4. a7
+    ['a8', 'b8'], // 4... Rb8
+  ]
+
+  for (const [index, [from, to]] of playMoves.entries()) {
+    fireEvent.click(screen.getByTestId(`square-${from}`))
+    fireEvent.click(screen.getByTestId(`square-${to}`))
+    // White just moved on even indices → black to move, and vice versa.
+    await screen.findByText(index % 2 === 0 ? '轮到黑方' : '轮到白方')
+  }
+
+  fireEvent.click(screen.getByTestId('square-a7'))
+  fireEvent.click(screen.getByTestId('square-b8'))
+
+  await screen.findByRole('dialog', { name: 'PROMOTE PAWN' })
+  expect(
+    screen
+      .getByLabelText('Promote to queen')
+      .querySelector('[data-piece="white-queen"]'),
+  ).not.toBeNull()
+
+  fireEvent.click(screen.getByLabelText('Promote to queen'))
+
+  // The promoted move applies asynchronously; black to move once settled.
+  await screen.findByText('轮到黑方')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(
+    screen.getByTestId('square-b8').querySelector('[data-piece="white-queen"]'),
+  ).not.toBeNull()
+})
+
+test('check is announced in the HUD', async () => {
+  startQuickGame()
+
+  // 1. e4 e5 2. Qf3 d6 3. Qxf7+
+  fireEvent.click(screen.getByTestId('square-e2'))
+  fireEvent.click(screen.getByTestId('square-e4'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-e7'))
+  fireEvent.click(screen.getByTestId('square-e5'))
+  await screen.findByText('轮到白方')
+
+  fireEvent.click(screen.getByTestId('square-d1'))
+  fireEvent.click(screen.getByTestId('square-f3'))
+  await screen.findByText('轮到黑方')
+
+  fireEvent.click(screen.getByTestId('square-d7'))
+  fireEvent.click(screen.getByTestId('square-d6'))
+  await screen.findByText('轮到白方')
+
+  fireEvent.click(screen.getByTestId('square-f3'))
+  fireEvent.click(screen.getByTestId('square-f7'))
+
+  await screen.findByText('黑方被将军')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
